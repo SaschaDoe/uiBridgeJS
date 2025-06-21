@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIBridge Help Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .output {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            border-radius: 0 5px 5px 0;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #b3d7ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🆘 UIBridge Help System Test</h1>
+        
+        <div id="status" class="status info">
+            Initializing UIBridge...
+        </div>
+
+        <div class="test-section">
+            <h3>General Help</h3>
+            <button class="test-button" onclick="testGeneralHelp()">Get General Help</button>
+            <button class="test-button" onclick="testHelpAlias()">Test --help Alias</button>
+            <div id="general-help-output" class="output" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Command-Specific Help</h3>
+            <button class="test-button" onclick="testCommandHelp('click')">Help for Click</button>
+            <button class="test-button" onclick="testCommandHelp('screenshot')">Help for Screenshot</button>
+            <button class="test-button" onclick="testCommandHelp('help')">Help for Help</button>
+            <button class="test-button" onclick="testCommandHelp('invalid')">Help for Invalid Command</button>
+            <div id="command-help-output" class="output" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Available Commands</h3>
+            <button class="test-button" onclick="testDiscoverCommands()">Discover All Commands</button>
+            <div id="discover-output" class="output" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test Elements</h3>
+            <button id="test-button" class="test-button">Test Button</button>
+            <div id="test-area" style="padding: 20px; background: #e9ecef; border-radius: 5px; margin: 10px 0;">
+                <p>This is a test area for taking screenshots</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load UIBridge -->
+    <script src="dist/uibridge.min.js"></script>
+    
+    <script>
+        let uibridge;
+        
+        // Initialize UIBridge
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                uibridge = new UIBridge({
+                    debug: true,
+                    commands: ['click', 'screenshot', 'help']
+                });
+                
+                await uibridge.init();
+                
+                updateStatus('✅ UIBridge initialized successfully!', 'success');
+                console.log('UIBridge initialized:', uibridge);
+                
+            } catch (error) {
+                updateStatus(`❌ Failed to initialize UIBridge: ${error.message}`, 'error');
+                console.error('UIBridge initialization failed:', error);
+            }
+        });
+        
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+        
+        async function testGeneralHelp() {
+            try {
+                updateStatus('🔍 Getting general help...', 'info');
+                const help = await uibridge.execute('help');
+                
+                displayOutput('general-help-output', JSON.stringify(help, null, 2));
+                updateStatus('✅ General help retrieved successfully!', 'success');
+                
+            } catch (error) {
+                displayOutput('general-help-output', `Error: ${error.message}`);
+                updateStatus(`❌ Failed to get help: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testHelpAlias() {
+            try {
+                updateStatus('🔍 Testing --help alias...', 'info');
+                const help = await uibridge.execute('--help');
+                
+                displayOutput('general-help-output', JSON.stringify(help, null, 2));
+                updateStatus('✅ --help alias works!', 'success');
+                
+            } catch (error) {
+                displayOutput('general-help-output', `Error: ${error.message}`);
+                updateStatus(`❌ --help alias failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testCommandHelp(commandName) {
+            try {
+                updateStatus(`🔍 Getting help for '${commandName}' command...`, 'info');
+                const help = await uibridge.execute('help', commandName);
+                
+                displayOutput('command-help-output', JSON.stringify(help, null, 2));
+                updateStatus(`✅ Help for '${commandName}' retrieved successfully!`, 'success');
+                
+            } catch (error) {
+                displayOutput('command-help-output', `Error: ${error.message}`);
+                updateStatus(`❌ Failed to get help for '${commandName}': ${error.message}`, 'error');
+            }
+        }
+        
+        async function testDiscoverCommands() {
+            try {
+                updateStatus('🔍 Discovering available commands...', 'info');
+                const commands = uibridge.discover();
+                
+                displayOutput('discover-output', JSON.stringify(commands, null, 2));
+                updateStatus('✅ Commands discovered successfully!', 'success');
+                
+            } catch (error) {
+                displayOutput('discover-output', `Error: ${error.message}`);
+                updateStatus(`❌ Failed to discover commands: ${error.message}`, 'error');
+            }
+        }
+        
+        function displayOutput(elementId, content) {
+            const outputEl = document.getElementById(elementId);
+            outputEl.textContent = content;
+            outputEl.style.display = 'block';
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,55 @@
+# Development files
+test/
+*.test.js
+*.spec.js
+test-*.js
+demo-*.js
+browser-*.js
+playwright-*.js
+execute-*.js
+real-*.js
+debug-*.html
+
+# Build tools
+build.js
+server-example.cjs
+.github/
+.vscode/
+
+# Documentation (except README and main docs)
+documentation/
+saved-screenshots/
+PROOF_OF_CONCEPT.md
+
+# Temporary files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+coverage/
+.nyc_output/
+junit.xml
+
+# Node modules (shouldn't be included anyway)
+node_modules/
+
+# Git files
+.git/
+.gitignore
+
+# Other build artifacts
+*.tgz
+package-lock.json
+yarn.lock 

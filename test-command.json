@@ -1,0 +1,11 @@
+{
+  "command": "screenshot",
+  "options": {
+    "saveConfig": {
+      "autoSave": true,
+      "folder": "llm-test",
+      "prefix": "real-screenshot",
+      "timestamp": true
+    }
+  }
+} 

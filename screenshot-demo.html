@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIBridge Screenshot Save Demo</title>
+    <script src="dist/uibridge.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+        
+        .demo-section h3 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .primary:hover {
+            background: #2563eb;
+        }
+        
+        .secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .secondary:hover {
+            background: #4b5563;
+        }
+        
+        .success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .success:hover {
+            background: #059669;
+        }
+        
+        .config-display {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        #test-content {
+            padding: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .screenshot-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌉 UIBridge Screenshot Save Demo</h1>
+        
+        <!-- Test Content -->
+        <div id="test-content" class="demo-section">
+            <h3>📸 Test Content Area</h3>
+            <p>This is a sample content area that can be captured in screenshots.</p>
+            <p>Current time: <span id="current-time"></span></p>
+            <button class="success" onclick="updateTime()">Update Time</button>
+        </div>
+        
+        <!-- Configuration Section -->
+        <div class="demo-section">
+            <h3>⚙️ Screenshot Configuration</h3>
+            <p>Configure where and how screenshots are saved:</p>
+            
+            <div class="button-group">
+                <button class="primary" onclick="configBasic()">Basic Download</button>
+                <button class="primary" onclick="configOrganized()">Organized Folders</button>
+                <button class="primary" onclick="configServerSave()">Server Save</button>
+                <button class="secondary" onclick="showCurrentConfig()">Show Config</button>
+            </div>
+            
+            <div id="config-display" class="config-display"></div>
+        </div>
+        
+        <!-- Screenshot Actions -->
+        <div class="demo-section">
+            <h3>📷 Take Screenshots</h3>
+            <p>Take screenshots with different configurations:</p>
+            
+            <div class="button-group">
+                <button class="success" onclick="screenshotElement()">Screenshot Element</button>
+                <button class="success" onclick="screenshotFullPage()">Full Page</button>
+                <button class="success" onclick="screenshotWithMetadata()">With Metadata</button>
+                <button class="success" onclick="screenshotCustomName()">Custom Name</button>
+            </div>
+            
+            <div id="screenshot-status" class="status info" style="display: none;"></div>
+            
+            <!-- Screenshot preview -->
+            <div id="screenshot-preview" style="display: none;">
+                <h4>Screenshot Preview:</h4>
+                <img id="preview-image" class="screenshot-preview" alt="Screenshot preview">
+            </div>
+        </div>
+        
+        <!-- Server Status -->
+        <div class="demo-section">
+            <h3>🖥️ Server Integration</h3>
+            <p>Check if screenshot server is running:</p>
+            
+            <div class="button-group">
+                <button class="secondary" onclick="checkServerStatus()">Check Server</button>
+                <button class="secondary" onclick="listSavedScreenshots()">List Saved</button>
+            </div>
+            
+            <div id="server-status" class="status info" style="display: none;"></div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="demo-section">
+            <h3>📋 Instructions</h3>
+            <ol>
+                <li><strong>Browser Downloads:</strong> Screenshots will download to your default download folder</li>
+                <li><strong>Organized Folders:</strong> Configure folder names and file prefixes</li>
+                <li><strong>Server Save:</strong> 
+                    <ul>
+                        <li>Start the server: <code>node server-example.js</code></li>
+                        <li>Screenshots will be saved to <code>saved-screenshots/</code> folder</li>
+                    </ul>
+                </li>
+                <li><strong>IndexedDB:</strong> Screenshots can also be saved in browser storage</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let bridge;
+        
+        // Initialize UIBridge
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Wait for UIBridge to be available
+                while (!window.UIBridge) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                bridge = new UIBridge({
+                    debug: true,
+                    defaultScreenshotConfig: {
+                        autoSave: true,
+                        folder: 'uibridge-demo',
+                        prefix: 'demo',
+                        timestamp: true,
+                        includeMetadata: false
+                    }
+                });
+                
+                await bridge.init();
+                updateTime();
+                showCurrentConfig();
+                
+                console.log('UIBridge initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize UIBridge:', error);
+                showStatus('error', `Failed to initialize UIBridge: ${error.message}`);
+            }
+        });
+        
+        // Update current time
+        function updateTime() {
+            document.getElementById('current-time').textContent = new Date().toLocaleString();
+        }
+        
+        // Configuration functions
+        function configBasic() {
+            bridge.configureScreenshots({
+                autoSave: true,
+                folder: 'screenshots',
+                prefix: 'screenshot',
+                timestamp: true,
+                includeMetadata: false
+            });
+            showCurrentConfig();
+            showStatus('success', 'Configured for basic downloads');
+        }
+        
+        function configOrganized() {
+            bridge.configureScreenshots({
+                autoSave: true,
+                folder: 'organized-screenshots/demo-session',
+                prefix: 'demo-screenshot',
+                timestamp: true,
+                includeMetadata: true
+            });
+            showCurrentConfig();
+            showStatus('success', 'Configured for organized folder structure');
+        }
+        
+        function configServerSave() {
+            bridge.configureScreenshots({
+                autoSave: true,
+                folder: 'server-screenshots',
+                prefix: 'server-demo',
+                timestamp: true,
+                includeMetadata: true,
+                serverEndpoint: 'http://localhost:3001/save-screenshot',
+                persistInBrowser: true
+            });
+            showCurrentConfig();
+            showStatus('success', 'Configured for server saving (requires server to be running)');
+        }
+        
+        function showCurrentConfig() {
+            const config = bridge.getScreenshotConfig();
+            document.getElementById('config-display').textContent = JSON.stringify(config, null, 2);
+        }
+        
+        // Screenshot functions
+        async function screenshotElement() {
+            try {
+                showStatus('info', 'Taking element screenshot...');
+                
+                const result = await bridge.execute('screenshot', {
+                    selector: '#test-content'
+                });
+                
+                showStatus('success', `Element screenshot saved: ${result.filePath}`);
+                showScreenshotPreview(result.dataUrl);
+                
+            } catch (error) {
+                showStatus('error', `Screenshot failed: ${error.message}`);
+            }
+        }
+        
+        async function screenshotFullPage() {
+            try {
+                showStatus('info', 'Taking full page screenshot...');
+                
+                const result = await bridge.execute('screenshot', {
+                    fullPage: true,
+                    format: 'jpeg',
+                    quality: 0.8
+                });
+                
+                showStatus('success', `Full page screenshot saved: ${result.filePath}`);
+                showScreenshotPreview(result.dataUrl);
+                
+            } catch (error) {
+                showStatus('error', `Screenshot failed: ${error.message}`);
+            }
+        }
+        
+        async function screenshotWithMetadata() {
+            try {
+                showStatus('info', 'Taking screenshot with metadata...');
+                
+                const result = await bridge.execute('screenshot', {
+                    selector: '#test-content',
+                    saveConfig: {
+                        includeMetadata: true,
+                        customName: null // Auto-generate with metadata
+                    }
+                });
+                
+                showStatus('success', `Screenshot with metadata saved: ${result.filePath}`);
+                showScreenshotPreview(result.dataUrl);
+                
+                if (result.metadata) {
+                    console.log('Screenshot metadata:', result.metadata);
+                }
+                
+            } catch (error) {
+                showStatus('error', `Screenshot failed: ${error.message}`);
+            }
+        }
+        
+        async function screenshotCustomName() {
+            try {
+                showStatus('info', 'Taking screenshot with custom name...');
+                
+                const customName = `custom-demo-${Date.now()}.png`;
+                
+                const result = await bridge.execute('screenshot', {
+                    selector: '#test-content',
+                    saveConfig: {
+                        customName: customName,
+                        folder: 'custom-screenshots'
+                    }
+                });
+                
+                showStatus('success', `Custom named screenshot saved: ${result.filePath}`);
+                showScreenshotPreview(result.dataUrl);
+                
+            } catch (error) {
+                showStatus('error', `Screenshot failed: ${error.message}`);
+            }
+        }
+        
+        // Server functions
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('http://localhost:3001/status');
+                const data = await response.json();
+                
+                showServerStatus('success', `Server is running! Screenshots dir: ${data.screenshotsDir}`);
+            } catch (error) {
+                showServerStatus('error', 'Server not running. Start with: node server-example.js');
+            }
+        }
+        
+        async function listSavedScreenshots() {
+            try {
+                const response = await fetch('http://localhost:3001/screenshots');
+                const data = await response.json();
+                
+                if (data.screenshots.length === 0) {
+                    showServerStatus('info', 'No screenshots found on server');
+                } else {
+                    showServerStatus('success', `Found ${data.screenshots.length} screenshots on server`);
+                    console.log('Saved screenshots:', data.screenshots);
+                }
+            } catch (error) {
+                showServerStatus('error', 'Could not connect to server');
+            }
+        }
+        
+        // UI helpers
+        function showStatus(type, message) {
+            const statusDiv = document.getElementById('screenshot-status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+        }
+        
+        function showServerStatus(type, message) {
+            const statusDiv = document.getElementById('server-status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+        }
+        
+        function showScreenshotPreview(dataUrl) {
+            const previewDiv = document.getElementById('screenshot-preview');
+            const previewImg = document.getElementById('preview-image');
+            
+            previewImg.src = dataUrl;
+            previewDiv.style.display = 'block';
+        }
+        
+        // Update time every second
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html> 
