@@ -1,4 +1,4 @@
-// Type definitions for @sashbot/uibridge v1.0.0
+// Type definitions for @sashbot/uibridge v1.2.5
 // Project: https://github.com/sashbot/uibridge-js
 // Definitions by: sashbot
 

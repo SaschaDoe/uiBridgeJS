@@ -1,6 +1,6 @@
 {
   "name": "@sashbot/uibridge",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "In-app automation framework for web applications - enables LLMs to control and interact with running web apps",
   "type": "module",
   "main": "dist/uibridge.cjs.js",
@@ -20,9 +20,12 @@
     "src/**/*",
     "README.md",
     "LICENSE",
+    "CHANGELOG.md",
     "server-example.cjs",
     "api-server.cjs",
-    "uibridge-help.js"
+    "uibridge-help.js",
+    "test-screenshot-fix.html",
+    "test-screenshot-fix.ps1"
   ],
   "scripts": {
     "build": "node build.js",
