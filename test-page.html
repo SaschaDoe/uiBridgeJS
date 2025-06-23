@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIBridge Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success {
+            background: #28a745;
+        }
+        .danger {
+            background: #dc3545;
+        }
+        input, textarea {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            background: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>UIBridge Automation Test Page</h1>
+        
+        <div class="test-section">
+            <h3>Button Tests</h3>
+            <button id="test-button-1" data-testid="primary-btn">Primary Button (Test ID)</button>
+            <button class="success-btn">Success Button (Class)</button>
+            <button aria-label="Click me for demo">Aria Label Button</button>
+            <button>Simple Text Button</button>
+        </div>
+
+        <div class="test-section">
+            <h3>Form Tests</h3>
+            <input type="text" id="username" placeholder="Enter username" />
+            <input type="email" id="email" placeholder="Enter email" />
+            <textarea id="message" placeholder="Enter message"></textarea>
+            <button id="submit-form" class="success">Submit Form</button>
+        </div>
+
+        <div class="test-section">
+            <h3>Link Tests</h3>
+            <a href="#" id="nav-link">Navigation Link</a> | 
+            <a href="#" data-testid="external-link">External Link</a>
+        </div>
+
+        <div class="test-section">
+            <h3>Action Results</h3>
+            <div id="status">Ready for automation tests...</div>
+        </div>
+    </div>
+
+    <!-- Include UIBridge -->
+    <script src="node_modules/@sashbot/uibridge/dist/uibridge.min.js"></script>
+    <script>
+        // Initialize UIBridge
+        window.uibridge = new UIBridge();
+        
+        // Add click handlers for demonstration
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') {
+                const statusDiv = document.getElementById('status');
+                statusDiv.innerHTML = `✅ Clicked: ${e.target.textContent || e.target.id || 'Button'} at ${new Date().toLocaleTimeString()}`;
+                statusDiv.style.background = '#d4edda';
+                statusDiv.style.color = '#155724';
+                
+                // Prevent default for links
+                if (e.target.tagName === 'A') {
+                    e.preventDefault();
+                }
+            }
+        });
+
+        // Log UIBridge availability
+        console.log('UIBridge initialized:', window.uibridge?._isInitialized);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,4 @@
+{
+  "command": "click",
+  "selector": "#test-button"
+} 
