@@ -20,8 +20,7 @@
     "src/**/*",
     "README.md",
     "LICENSE",
-    "UIBRIDGE_COMMANDS.md",
-    "AGENT_HELP_GUIDE.md",
+    "server-example.cjs",
     "uibridge-help.js"
   ],
   "scripts": {
