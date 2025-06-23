@@ -17,7 +17,7 @@ export class UIBridge {
       generateCDI: true,
       enableHttpDiscovery: false,
       autoInit: true,
-      version: '1.2.5',
+      version: '1.2.6',
       
       // Screenshot save configuration
       defaultScreenshotConfig: {

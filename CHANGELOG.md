@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.6] - 2024-12-28
+
+### Added
+- **Server Setup Helper**: New `setup-server.js` script to copy server files to user projects
+- **Binary Command**: Added `npx uibridge-setup` command for easy server setup
+- **npm Script**: Added `npm run setup-server` for package users
+- **Enhanced Documentation**: Updated README with prominent server setup instructions
+
+### Changed
+- Made server files much easier to discover and set up after installation
+- Updated README with clear step-by-step server setup instructions
+- Improved PowerShell examples to use the correct port (3002) for api-server
+
+### Fixed
+- **Discoverability Issue**: Server files now have clear setup process instead of being "hidden" in node_modules
+- AI agents and users can now easily find and copy the required server files
+
 ## [1.2.5] - 2024-12-28
 
 ### Fixed

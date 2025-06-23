@@ -15,7 +15,7 @@ const commonConfig = {
   sourcemap: true,
   target: ['es2020'],
   define: {
-    VERSION: '"1.2.5"'
+    VERSION: '"1.2.6"'
   },
   external: ['html2canvas'] // html2canvas will be loaded dynamically
 };
@@ -38,7 +38,7 @@ async function buildAll() {
       minify: !isDev,
       platform: 'browser',
       banner: {
-        js: `/*! @sashbot/uibridge v1.2.5 | MIT License | https://github.com/sashbot/uibridge-js */`
+        js: `/*! @sashbot/uibridge v1.2.6 | MIT License | https://github.com/sashbot/uibridge-js */`
       }
     });
     
@@ -53,7 +53,7 @@ async function buildAll() {
       minify: !isDev,
       platform: 'neutral',
       banner: {
-        js: `/*! @sashbot/uibridge v1.2.5 ESM | MIT License */`
+        js: `/*! @sashbot/uibridge v1.2.6 ESM | MIT License */`
       }
     });
     
@@ -68,7 +68,7 @@ async function buildAll() {
       minify: !isDev,
       platform: 'node',
       banner: {
-        js: `/*! @sashbot/uibridge v1.2.5 CJS | MIT License */`
+        js: `/*! @sashbot/uibridge v1.2.6 CJS | MIT License */`
       },
       footer: {
         js: `
@@ -128,7 +128,7 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 function generateTypeDefinitions() {
-  const dts = `// Type definitions for @sashbot/uibridge v1.2.5
+  const dts = `// Type definitions for @sashbot/uibridge v1.2.6
 // Project: https://github.com/sashbot/uibridge-js
 // Definitions by: sashbot
 

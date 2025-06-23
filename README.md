@@ -11,10 +11,11 @@ UIBridge is designed to be AI-friendly with simple, natural commands:
 
 ### For AI Agents Using PowerShell (Recommended)
 ```powershell
-# Start UIBridge REST API server first: node server-example.cjs
+# 1. First run: npx uibridge-setup (copies server files)
+# 2. Start server: node uibridge-api-server.cjs
 
 $params = @{
-    Uri = 'http://localhost:3001/execute-command'
+    Uri = 'http://localhost:3002/execute'  # Note: Port 3002 for api-server
     Method = 'POST'
     Headers = @{ 'Content-Type' = 'application/json' }
     Body = @{
@@ -40,6 +41,30 @@ await uibridge.execute('help', 'click'); // Get command details
 ### Method 1: NPM Package (Recommended for AI)
 ```bash
 npm install @sashbot/uibridge
+```
+
+### 🚀 Quick Server Setup (Essential for AI Automation)
+After installing UIBridge, you need to copy the server files to your project:
+
+```bash
+# Option 1: Use the setup helper (recommended)
+npx uibridge-setup
+
+# Option 2: Use npm script
+npm run setup-server
+```
+
+This will copy:
+- `uibridge-api-server.cjs` - Full API server for automation (Port 3002)
+- `uibridge-queue-server.cjs` - Queue-only server (Port 3001) 
+- `uibridge-test.html` - Test page for verification
+- `uibridge-test.ps1` - PowerShell test script
+
+Then start the server:
+```bash
+node uibridge-api-server.cjs   # Recommended for AI agents
+# OR
+node uibridge-queue-server.cjs # Basic queue functionality
 ```
 
 ```javascript

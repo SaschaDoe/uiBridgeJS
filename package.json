@@ -1,11 +1,14 @@
 {
   "name": "@sashbot/uibridge",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "In-app automation framework for web applications - enables LLMs to control and interact with running web apps",
   "type": "module",
   "main": "dist/uibridge.cjs.js",
   "module": "dist/uibridge.esm.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "uibridge-setup": "./setup-server.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -24,6 +27,7 @@
     "server-example.cjs",
     "api-server.cjs",
     "uibridge-help.js",
+    "setup-server.js",
     "test-screenshot-fix.html",
     "test-screenshot-fix.ps1"
   ],
@@ -43,6 +47,7 @@
     "help:patterns": "node uibridge-help.js patterns",
     "help:examples": "node uibridge-help.js examples",
     "help:debug": "node uibridge-help.js debug",
+    "setup-server": "node setup-server.js",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",
     "postpublish": "git push && git push --tags",
