@@ -7,6 +7,9 @@
  * for AI agents and automated systems working with UIBridge.
  */
 
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
 const colors = {
   reset: '\x1b[0m',
   bright: '\x1b[1m',
@@ -45,6 +48,53 @@ function printCodeBlock(title, code) {
 function printAIQuickStart() {
   printHeader('AI Agent Quick Start Guide');
   
+  printSection('Package Installation', 
+    'Install UIBridge in your project:\n' +
+    '• npm install @sashbot/uibridge\n' +
+    '• yarn add @sashbot/uibridge\n' +
+    '• pnpm add @sashbot/uibridge'
+  );
+
+  printSection('Server Setup for AI Agents', 
+    'UIBridge includes a built-in HTTP API server:\n' +
+    '• Location: node_modules/@sashbot/uibridge/server-example.cjs\n' +
+    '• Start server: npm run server (after installation)\n' +
+    '• Default port: 3000 (configurable)\n' +
+    '• API endpoints: /api/uibridge/execute, /api/uibridge/health'
+  );
+
+  printCodeBlock('Start Server (Command Line)', 
+    `# Option 1: Using npm script
+npm run server
+
+# Option 2: Direct execution
+node node_modules/@sashbot/uibridge/server-example.cjs
+
+# Option 3: Custom port
+PORT=8080 node node_modules/@sashbot/uibridge/server-example.cjs`
+  );
+
+  printCodeBlock('HTTP API Usage', 
+    `# Health check
+curl http://localhost:3000/api/uibridge/health
+
+# Execute click command
+curl -X POST http://localhost:3000/api/uibridge/execute \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "command": "click",
+    "parameters": {"text": "Submit"}
+  }'
+
+# Take screenshot
+curl -X POST http://localhost:3000/api/uibridge/execute \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "command": "screenshot",
+    "parameters": {"fullPage": true}
+  }'`
+  );
+  
   printSection('Essential Commands', 
     'UIBridge provides three core commands for AI automation:\n' +
     '• click    - Interact with any clickable element\n' +
@@ -52,7 +102,7 @@ function printAIQuickStart() {
     '• help     - Get command details and guidance'
   );
 
-  printCodeBlock('Basic AI Pattern', 
+  printCodeBlock('Browser Integration Pattern', 
     `// 1. Check UIBridge availability
 if (!window.uibridge?._isInitialized) {
   throw new Error('UIBridge not available');
@@ -658,6 +708,28 @@ function main() {
   const args = process.argv.slice(2);
   const command = args[0];
   
+  // Handle --help or -h flags
+  if (command === '--help' || command === '-h' || command === 'help') {
+    printAIQuickStart();
+    printSelectorStrategies();
+    printCommandReference();
+    printPowerShellPatterns();
+    printWorkflowPatterns();
+    printDebuggingGuide();
+    printBestPractices();
+    printEnvironmentSetup();
+    printUsageExamples();
+    
+    console.log('\n' + colorize('🎯 For specific help, use:', 'bright'));
+    console.log(colorize('  node uibridge-help.js quickstart', 'cyan'));
+    console.log(colorize('  node uibridge-help.js commands', 'cyan'));
+    console.log(colorize('  node uibridge-help.js powershell', 'cyan'));
+    console.log(colorize('  node uibridge-help.js patterns', 'cyan'));
+    console.log(colorize('  node uibridge-help.js debug', 'cyan'));
+    console.log(colorize('  node uibridge-help.js examples', 'cyan'));
+    return;
+  }
+  
   if (!command) {
     // Full help
     printAIQuickStart();
@@ -709,8 +781,12 @@ function main() {
   }
 }
 
-// ES module compatibility
-if (import.meta.url === `file://${process.argv[1]}`) {
+// ES module compatibility - run if this file is executed directly
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Check if this file is being run directly
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   main();
 }
 
@@ -723,5 +799,6 @@ export {
   printDebuggingGuide,
   printBestPractices,
   printEnvironmentSetup,
-  printUsageExamples
+  printUsageExamples,
+  main
 }; 
