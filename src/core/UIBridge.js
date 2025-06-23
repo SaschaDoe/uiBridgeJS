@@ -603,6 +603,83 @@ export class UIBridge {
           "2. Execute action (click, screenshot, etc.)",
           "3. Verify result with screenshot or status check"
         ]
+      },
+
+      // PowerShell REST API patterns for external AI agents
+      powershellPatterns: {
+        "Basic Click Command": {
+          description: "Execute click action via PowerShell REST API",
+          code: `$params = @{
+    Uri = 'http://localhost:3001/execute-command'
+    Method = 'POST'
+    Headers = @{ 'Content-Type' = 'application/json' }
+    Body = @{
+        command = 'click'
+        selector = '#submit-button'
+    } | ConvertTo-Json
+}
+$response = Invoke-RestMethod @params`
+        },
+        "Screenshot with Auto-Save": {
+          description: "Take screenshot and save automatically",
+          code: `$params = @{
+    Uri = 'http://localhost:3001/execute-command'
+    Method = 'POST'
+    Headers = @{ 'Content-Type' = 'application/json' }
+    Body = @{
+        command = 'screenshot'
+        options = @{
+            fullPage = $true
+            saveConfig = @{
+                autoSave = $true
+                folder = 'ai-automation'
+                timestamp = $true
+            }
+        }
+    } | ConvertTo-Json -Depth 4
+}
+$response = Invoke-RestMethod @params`
+        },
+        "Reusable Function": {
+          description: "Create reusable PowerShell function for UIBridge commands",
+          code: `function Invoke-UIBridgeCommand {
+    param([string]$Command, [hashtable]$Parameters = @{})
+    
+    $params = @{
+        Uri = 'http://localhost:3001/execute-command'
+        Method = 'POST'
+        Headers = @{ 'Content-Type' = 'application/json' }
+        Body = (@{ command = $Command } + $Parameters) | ConvertTo-Json -Depth 4
+    }
+    
+    try {
+        return Invoke-RestMethod @params
+    } catch {
+        Write-Error "UIBridge command failed: $_"
+        throw
+    }
+}
+
+# Usage:
+Invoke-UIBridgeCommand -Command 'click' -Parameters @{selector='#btn'}`
+        }
+      },
+
+      // External API information
+      restApiInfo: {
+        server: "Start with: node server-example.cjs",
+        baseUrl: "http://localhost:3001",
+        endpoints: {
+          executeCommand: "POST /execute-command",
+          getStatus: "GET /status", 
+          getHelp: "GET /discover-commands"
+        },
+        powershellTips: [
+          "Always use Invoke-RestMethod with hashtable splatting",
+          "Include proper error handling with try/catch blocks",
+          "Use ConvertTo-Json -Depth 4 for nested objects",
+          "Store common configuration in reusable variables"
+        ]
       }
     };
   }
@@ -616,17 +693,20 @@ export class UIBridge {
       click: [
         "Try multiple selector strategies if element not found",
         "Use force: true option if element is covered",
-        "Consider scroll behavior - element might be off-screen"
+        "Consider scroll behavior - element might be off-screen",
+        "PowerShell API: Use selector parameter in request body"
       ],
       screenshot: [
         "Use fullPage: true for complete page capture",
         "Specify selector for element-specific screenshots", 
-        "Set saveConfig for automatic file saving"
+        "Set saveConfig for automatic file saving",
+        "PowerShell API: Use -Depth 4 with ConvertTo-Json for nested options"
       ],
       help: [
         "Use without arguments for full command list",
         "Specify command name for detailed help",
-        "Check usage examples for proper syntax"
+        "Check usage examples for proper syntax",
+        "PowerShell API: Available at GET /discover-commands endpoint"
       ]
     };
     return tips[commandName] || ["Execute with proper await syntax", "Handle errors with try/catch"];

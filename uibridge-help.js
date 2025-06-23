@@ -396,6 +396,196 @@ onMount(async () => {
   );
 }
 
+function printPowerShellPatterns() {
+  printHeader('PowerShell REST API for AI Agents');
+  
+  printSection('Server Setup',
+    'First, start the UIBridge REST API server:\n' +
+    '  npm install express cors fs-extra\n' +
+    '  node server-example.cjs\n\n' +
+    'Server runs on http://localhost:3001'
+  );
+
+  printCodeBlock('Basic PowerShell Click Command', 
+    `# Define parameters using hashtable splatting (PowerShell best practice)
+$params = @{
+    Uri         = 'http://localhost:3001/execute-command'
+    Method      = 'POST'
+    Headers     = @{
+        'Content-Type' = 'application/json'
+        'Accept'       = 'application/json'
+    }
+    Body        = @{
+        command  = 'click'
+        selector = '#submit-button'
+        options  = @{
+            force = $true
+        }
+    } | ConvertTo-Json
+}
+
+# Execute the request with error handling
+try {
+    $response = Invoke-RestMethod @params
+    Write-Host "✅ Click successful: $($response.message)"
+} catch {
+    Write-Error "❌ Click failed: $_"
+}`
+  );
+
+  printCodeBlock('PowerShell Screenshot with Auto-Save', 
+    `$params = @{
+    Uri         = 'http://localhost:3001/execute-command'
+    Method      = 'POST'
+    Headers     = @{ 'Content-Type' = 'application/json' }
+    Body        = @{
+        command = 'screenshot'
+        options = @{
+            fullPage = $true
+            saveConfig = @{
+                autoSave = $true
+                folder = 'ai-screenshots'
+                prefix = 'automation'
+                timestamp = $true
+            }
+        }
+    } | ConvertTo-Json -Depth 4  # Important: Use -Depth for nested objects
+}
+
+$response = Invoke-RestMethod @params
+Write-Host "📸 Screenshot saved: $($response.command.result.fileName)"`
+  );
+
+  printCodeBlock('Reusable PowerShell Function', 
+    `# Store common configuration globally
+$global:UIBridgeConfig = @{
+    BaseUri = 'http://localhost:3001'
+    Headers = @{ 'Content-Type' = 'application/json' }
+}
+
+function Invoke-UIBridgeCommand {
+    param(
+        [string]$Command,
+        [hashtable]$Parameters = @{},
+        [hashtable]$Options = @{}
+    )
+    
+    $params = @{
+        Uri     = "$($global:UIBridgeConfig.BaseUri)/execute-command"
+        Method  = 'POST'
+        Headers = $global:UIBridgeConfig.Headers
+        Body    = @{
+            command = $Command
+        } | ConvertTo-Json -Depth 4
+    }
+    
+    # Add parameters to body
+    $bodyObj = $params.Body | ConvertFrom-Json
+    if ($Parameters.Count -gt 0) {
+        foreach ($key in $Parameters.Keys) {
+            $bodyObj | Add-Member -NotePropertyName $key -NotePropertyValue $Parameters[$key]
+        }
+    }
+    if ($Options.Count -gt 0) {
+        $bodyObj | Add-Member -NotePropertyName 'options' -NotePropertyValue $Options
+    }
+    
+    $params.Body = $bodyObj | ConvertTo-Json -Depth 4
+    
+    try {
+        $response = Invoke-RestMethod @params
+        return $response
+    } catch {
+        Write-Error "UIBridge command '$Command' failed: $_"
+        throw
+    }
+}
+
+# Usage examples:
+# Invoke-UIBridgeCommand -Command 'click' -Parameters @{selector='#btn'}
+# Invoke-UIBridgeCommand -Command 'screenshot' -Options @{fullPage=$true}`
+  );
+
+  printCodeBlock('Complete AI Workflow in PowerShell', 
+    `function Start-UIBridgeAutomation {
+    param([string]$TargetUrl = 'http://localhost:3000')
+    
+    Write-Host "🤖 Starting UIBridge automation workflow..."
+    
+    # 1. Check server status
+    try {
+        $status = Invoke-RestMethod -Uri 'http://localhost:3001/status'
+        Write-Host "✅ UIBridge server is running"
+    } catch {
+        Write-Error "❌ UIBridge server not available. Run: node server-example.cjs"
+        return
+    }
+    
+    # 2. Take initial screenshot
+    $screenshot1 = Invoke-UIBridgeCommand -Command 'screenshot' -Options @{
+        fullPage = $true
+        saveConfig = @{
+            prefix = 'initial-state'
+            timestamp = $true
+        }
+    }
+    Write-Host "📸 Initial screenshot: $($screenshot1.command.result.fileName)"
+    
+    # 3. Execute click action with multiple selector strategies
+    $clickTargets = @(
+        @{ testId = 'submit-btn' },
+        '#submit-button',
+        @{ text = 'Submit' },
+        @{ ariaLabel = 'Submit form' }
+    )
+    
+    $clickSuccess = $false
+    foreach ($target in $clickTargets) {
+        try {
+            $clickResult = Invoke-UIBridgeCommand -Command 'click' -Parameters @{
+                selector = $target
+            } -Options @{ force = $true }
+            
+            Write-Host "🖱️ Click successful with selector: $($target | ConvertTo-Json -Compress)"
+            $clickSuccess = $true
+            break
+        } catch {
+            Write-Host "⚠️ Click failed with selector: $($target | ConvertTo-Json -Compress)"
+        }
+    }
+    
+    if (-not $clickSuccess) {
+        Write-Error "❌ All click attempts failed"
+        return
+    }
+    
+    # 4. Wait for page response
+    Start-Sleep -Seconds 2
+    
+    # 5. Take verification screenshot
+    $screenshot2 = Invoke-UIBridgeCommand -Command 'screenshot' -Options @{
+        fullPage = $true
+        saveConfig = @{
+            prefix = 'after-click'
+            timestamp = $true
+        }
+    }
+    Write-Host "📸 Verification screenshot: $($screenshot2.command.result.fileName)"
+    
+    Write-Host "✅ Automation workflow completed!"
+    
+    return @{
+        success = $true
+        beforeScreenshot = $screenshot1.command.result.fileName
+        afterScreenshot = $screenshot2.command.result.fileName
+    }
+}
+
+# Run the automation
+Start-UIBridgeAutomation`
+  );
+}
+
 function printUsageExamples() {
   printHeader('Complete AI Usage Examples');
   
@@ -473,6 +663,7 @@ function main() {
     printAIQuickStart();
     printSelectorStrategies();
     printCommandReference();
+    printPowerShellPatterns();
     printWorkflowPatterns();
     printDebuggingGuide();
     printBestPractices();
@@ -482,6 +673,7 @@ function main() {
     console.log('\n' + colorize('🎯 For specific help, use:', 'bright'));
     console.log(colorize('  node uibridge-help.js quickstart', 'cyan'));
     console.log(colorize('  node uibridge-help.js commands', 'cyan'));
+    console.log(colorize('  node uibridge-help.js powershell', 'cyan'));
     console.log(colorize('  node uibridge-help.js patterns', 'cyan'));
     console.log(colorize('  node uibridge-help.js debug', 'cyan'));
     console.log(colorize('  node uibridge-help.js examples', 'cyan'));
@@ -492,6 +684,9 @@ function main() {
     
   } else if (command === 'commands') {
     printCommandReference();
+    
+  } else if (command === 'powershell') {
+    printPowerShellPatterns();
     
   } else if (command === 'patterns') {
     printWorkflowPatterns();
@@ -510,7 +705,7 @@ function main() {
     
   } else {
     console.log(colorize('❌ Unknown command:', 'red') + ` ${command}`);
-    console.log(colorize('Available commands: quickstart, commands, patterns, debug, best-practices, setup, examples', 'yellow'));
+    console.log(colorize('Available commands: quickstart, commands, powershell, patterns, debug, best-practices, setup, examples', 'yellow'));
   }
 }
 
@@ -523,6 +718,7 @@ export {
   printAIQuickStart,
   printSelectorStrategies,
   printCommandReference,
+  printPowerShellPatterns,
   printWorkflowPatterns,
   printDebuggingGuide,
   printBestPractices,

@@ -9,6 +9,25 @@
 
 UIBridge is designed to be AI-friendly with simple, natural commands:
 
+### For AI Agents Using PowerShell (Recommended)
+```powershell
+# Start UIBridge REST API server first: node server-example.cjs
+
+$params = @{
+    Uri = 'http://localhost:3001/execute-command'
+    Method = 'POST'
+    Headers = @{ 'Content-Type' = 'application/json' }
+    Body = @{
+        command = 'click'
+        selector = '#submit-button'
+    } | ConvertTo-Json
+}
+$response = Invoke-RestMethod @params
+```
+
+📖 **[Complete PowerShell Guide](./POWERSHELL_AGENT_GUIDE.md)** | 🚀 **[Example Script](./example-powershell-automation.ps1)**
+
+### For Browser/JavaScript Integration
 ```javascript
 // Basic automation pattern for AI agents
 await uibridge.execute('click', '#submit-button');
@@ -274,16 +293,236 @@ const bridge = new UIBridge({
 5. **Aria Label**: `{ ariaLabel: 'Label' }` - Medium reliability
 6. **XPath**: `{ xpath: '//button[@id="submit"]' }` - Advanced use
 
+## 🌐 REST API for AI Agents (PowerShell & Curl)
+
+UIBridge includes a REST API server for external control, perfect for AI agents like Cursor using PowerShell commands.
+
+### Starting the REST API Server
+```bash
+# Install dependencies first
+npm install express cors fs-extra
+
+# Start the UIBridge REST API server
+node server-example.cjs
+```
+
+Server runs on `http://localhost:3001` with these endpoints:
+- `POST /execute-command` - Execute UIBridge commands
+- `GET /pending-commands` - Get queued commands for web app
+- `POST /command-result` - Update command results
+- `POST /save-screenshot` - Save screenshot data
+- `GET /status` - Server health check
+
+### PowerShell Automation for AI Agents
+
+**Best Practice: Use `Invoke-RestMethod` with splatting for clean, maintainable PowerShell code.**
+
+#### Click Element via PowerShell
+```powershell
+# Define parameters in a hashtable (PowerShell best practice)
+$params = @{
+    Uri         = 'http://localhost:3001/execute-command'
+    Method      = 'POST'
+    Headers     = @{
+        'Content-Type' = 'application/json'
+        'Accept'       = 'application/json'
+    }
+    Body        = @{
+        command  = 'click'
+        selector = '#submit-button'
+        options  = @{
+            force = $true
+        }
+    } | ConvertTo-Json
+}
+
+# Execute the request
+try {
+    $response = Invoke-RestMethod @params
+    Write-Host "✅ Click successful: $($response.message)"
+} catch {
+    Write-Error "❌ Click failed: $_"
+}
+```
+
+#### Take Screenshot via PowerShell
+```powershell
+$params = @{
+    Uri         = 'http://localhost:3001/execute-command'
+    Method      = 'POST'
+    Headers     = @{ 'Content-Type' = 'application/json' }
+    Body        = @{
+        command = 'screenshot'
+        options = @{
+            fullPage = $true
+            saveConfig = @{
+                autoSave = $true
+                folder = 'ai-screenshots'
+                prefix = 'automation'
+                timestamp = $true
+            }
+        }
+    } | ConvertTo-Json -Depth 4
+}
+
+$response = Invoke-RestMethod @params
+Write-Host "📸 Screenshot saved: $($response.command.result.fileName)"
+```
+
+#### Reusable PowerShell Functions for AI
+```powershell
+# Store common configuration
+$global:UIBridgeConfig = @{
+    BaseUri = 'http://localhost:3001'
+    Headers = @{ 'Content-Type' = 'application/json' }
+}
+
+function Invoke-UIBridgeCommand {
+    param(
+        [string]$Command,
+        [hashtable]$Parameters = @{},
+        [hashtable]$Options = @{}
+    )
+    
+    $params = @{
+        Uri     = "$($global:UIBridgeConfig.BaseUri)/execute-command"
+        Method  = 'POST'
+        Headers = $global:UIBridgeConfig.Headers
+        Body    = @{
+            command = $Command
+        } | ConvertTo-Json -Depth 4
+    }
+    
+    # Add parameters to body
+    $bodyObj = $params.Body | ConvertFrom-Json
+    if ($Parameters.Count -gt 0) {
+        foreach ($key in $Parameters.Keys) {
+            $bodyObj | Add-Member -NotePropertyName $key -NotePropertyValue $Parameters[$key]
+        }
+    }
+    if ($Options.Count -gt 0) {
+        $bodyObj | Add-Member -NotePropertyName 'options' -NotePropertyValue $Options
+    }
+    
+    $params.Body = $bodyObj | ConvertTo-Json -Depth 4
+    
+    try {
+        $response = Invoke-RestMethod @params
+        return $response
+    } catch {
+        Write-Error "UIBridge command '$Command' failed: $_"
+        throw
+    }
+}
+
+# Usage examples:
+# Invoke-UIBridgeCommand -Command 'click' -Parameters @{selector='#btn'}
+# Invoke-UIBridgeCommand -Command 'screenshot' -Options @{fullPage=$true}
+```
+
+#### AI Agent Workflow with PowerShell
+```powershell
+# Complete automation workflow
+function Start-UIBridgeAutomation {
+    param([string]$TargetUrl = 'http://localhost:3000')
+    
+    Write-Host "🤖 Starting UIBridge automation workflow..."
+    
+    # 1. Check server status
+    try {
+        $status = Invoke-RestMethod -Uri 'http://localhost:3001/status'
+        Write-Host "✅ UIBridge server is running"
+    } catch {
+        Write-Error "❌ UIBridge server not available. Run: node server-example.cjs"
+        return
+    }
+    
+    # 2. Take initial screenshot
+    $screenshot1 = Invoke-UIBridgeCommand -Command 'screenshot' -Options @{
+        fullPage = $true
+        saveConfig = @{
+            prefix = 'initial-state'
+            timestamp = $true
+        }
+    }
+    Write-Host "📸 Initial screenshot: $($screenshot1.command.result.fileName)"
+    
+    # 3. Execute click action
+    $clickResult = Invoke-UIBridgeCommand -Command 'click' -Parameters @{
+        selector = @{ text = 'Submit' }
+    } -Options @{
+        force = $true
+    }
+    Write-Host "🖱️ Click executed successfully"
+    
+    # 4. Take verification screenshot
+    Start-Sleep -Seconds 2  # Wait for page response
+    $screenshot2 = Invoke-UIBridgeCommand -Command 'screenshot' -Options @{
+        fullPage = $true
+        saveConfig = @{
+            prefix = 'after-click'
+            timestamp = $true
+        }
+    }
+    Write-Host "📸 Verification screenshot: $($screenshot2.command.result.fileName)"
+    
+    Write-Host "✅ Automation workflow completed!"
+}
+
+# Run the automation
+Start-UIBridgeAutomation
+```
+
+### Meta Prompt for Cursor AI
+
+Use this meta prompt in Cursor to ensure clean PowerShell code generation:
+
+```
+When writing PowerShell code to send HTTP requests to UIBridge REST API, always follow these rules:
+
+1. Use Invoke-RestMethod with hashtable splatting (not Invoke-WebRequest or curl)
+2. Convert body data to JSON using ConvertTo-Json
+3. Include proper error handling with try/catch
+4. Use single quotes for strings unless variable interpolation is needed
+5. Store common configuration in reusable variables
+
+Template structure:
+$params = @{
+    Uri         = 'http://localhost:3001/execute-command'
+    Method      = 'POST'
+    Headers     = @{ 'Content-Type' = 'application/json' }
+    Body        = @{
+        command = '[COMMAND_NAME]'
+        # Add command-specific parameters
+    } | ConvertTo-Json
+}
+
+try {
+    $response = Invoke-RestMethod @params
+    # Process $response here
+} catch {
+    Write-Error "Request failed: $_"
+}
+
+Available UIBridge commands:
+- click: Interact with elements (requires selector parameter)
+- screenshot: Capture page images (optional: fullPage, selector, saveConfig)
+- help: Get command documentation
+
+Use -Depth parameter with ConvertTo-Json for nested objects.
+```
+
 ## 🔍 Troubleshooting for AI
 
 ### Common Issues & Solutions
 
-| Issue | AI Solution | Code Example |
-|-------|-------------|--------------|
-| Element not found | Try multiple selectors | `await tryMultipleSelectors(['#btn', {text: 'Submit'}])` |
-| Click failed | Use force option | `await execute('click', '#btn', {force: true})` |
-| Screenshot empty | Check element visibility | `await execute('screenshot', {selector: 'body'})` |
-| Command unknown | Check available commands | `const cmds = uibridge.discover()` |
+| Issue | AI Solution | PowerShell Example |
+|-------|-------------|-------------------|
+| Element not found | Try multiple selectors | `$selector = @{text='Submit'}; if($failed) {$selector='#submit'}` |
+| Click failed | Use force option | `$options = @{force=$true}` |
+| Screenshot empty | Check element visibility | `$options = @{selector='body'; fullPage=$true}` |
+| Server not running | Start UIBridge server | `node server-example.cjs` |
+| JSON depth issues | Use -Depth parameter | `ConvertTo-Json -Depth 4` |
 
 ### Debug Mode for AI
 ```javascript
@@ -297,13 +536,32 @@ const bridge = new UIBridge({ debug: true });
 // - Performance metrics
 ```
 
+```powershell
+# PowerShell debugging
+$params = @{
+    Uri     = 'http://localhost:3001/execute-command'
+    Method  = 'POST'
+    Headers = @{ 'Content-Type' = 'application/json' }
+    Body    = @{
+        command = 'help'
+    } | ConvertTo-Json
+}
+
+$help = Invoke-RestMethod @params
+$help.command.result | ConvertTo-Json -Depth 3
+```
+
 ## 📞 Support & Integration
 
-- **Documentation**: [Full Usage Examples](./USAGE_EXAMPLES.md)
-- **AI Agent Guide**: Built-in help system with `execute('help')`
-- **Issues**: [GitHub Issues](https://github.com/sashbot/uibridge-js/issues)
-- **NPM**: [@sashbot/uibridge](https://www.npmjs.com/package/@sashbot/uibridge)
+- **🤖 PowerShell AI Guide**: [POWERSHELL_AGENT_GUIDE.md](./POWERSHELL_AGENT_GUIDE.md)
+- **🚀 PowerShell Script**: [example-powershell-automation.ps1](./example-powershell-automation.ps1)
+- **📚 Documentation**: [Full Usage Examples](./USAGE_EXAMPLES.md)
+- **🛠️ AI Agent Guide**: Built-in help system with `execute('help')`
+- **🌐 REST API**: Start with `node server-example.cjs` on port 3001
+- **💻 PowerShell Scripts**: Use `Invoke-RestMethod` with splatting pattern
+- **🐛 Issues**: [GitHub Issues](https://github.com/sashbot/uibridge-js/issues)
+- **📦 NPM**: [@sashbot/uibridge](https://www.npmjs.com/package/@sashbot/uibridge)
 
 ---
 
-**🤖 Built for AI**: UIBridge is specifically designed with AI agents in mind, providing clear command patterns, robust error handling, and extensive automation capabilities. 
+**🤖 Built for AI**: UIBridge is specifically designed with AI agents in mind, providing clear command patterns, robust error handling, extensive automation capabilities, and PowerShell-friendly REST API integration. 

@@ -1,14 +1,8 @@
-/*
- * UIBridge v0.1.0
- * In-app automation framework for web applications
- * Built: 2025-06-21T14:47:15.863Z
- */
 var UIBridge = (() => {
   var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
   var __export = (target, all) => {
     for (var name2 in all)
       __defProp(target, name2, { get: all[name2], enumerable: true });
@@ -40,7 +34,7 @@ var UIBridge = (() => {
   });
 
   // src/core/CommandRegistry.js
-  var _CommandRegistry = class _CommandRegistry {
+  var CommandRegistry = class {
     constructor() {
       this.commands = /* @__PURE__ */ new Map();
     }
@@ -119,11 +113,9 @@ var UIBridge = (() => {
       return this.commands.size;
     }
   };
-  __name(_CommandRegistry, "CommandRegistry");
-  var CommandRegistry = _CommandRegistry;
 
   // src/core/SelectorEngine.js
-  var _SelectorEngine = class _SelectorEngine {
+  var SelectorEngine = class {
     constructor() {
       this.strategies = /* @__PURE__ */ new Map();
       this._setupDefaultStrategies();
@@ -355,11 +347,9 @@ var UIBridge = (() => {
       return focusableTags.includes(element.tagName.toLowerCase()) || element.hasAttribute("tabindex") || element.hasAttribute("contenteditable");
     }
   };
-  __name(_SelectorEngine, "SelectorEngine");
-  var SelectorEngine = _SelectorEngine;
 
   // src/discovery/CDIGenerator.js
-  var _CDIGenerator = class _CDIGenerator {
+  var CDIGenerator = class {
     constructor(registry) {
       this.registry = registry;
       this.version = "1.0.0";
@@ -689,13 +679,17 @@ ${example}
       return typeMap[type] || "string";
     }
   };
-  __name(_CDIGenerator, "CDIGenerator");
-  var CDIGenerator = _CDIGenerator;
 
   // src/commands/click.js
   var clickCommand = {
     name: "click",
     description: "Clicks on an element using synthetic mouse events",
+    examples: [
+      "execute('click', '#submit-button')",
+      "execute('click', { text: 'Submit' })",
+      "execute('click', { testId: 'login-btn' })",
+      "execute('click', '#button', { position: 'center', clickCount: 2 })"
+    ],
     parameters: [
       {
         name: "selector",
@@ -709,11 +703,6 @@ ${example}
         required: false,
         description: "Click options: { force?, position?, button?, clickCount?, delay? }"
       }
-    ],
-    examples: [
-      "await uibridge.execute('click', '#submit-button')",
-      "await uibridge.execute('click', { testId: 'login-btn' })",
-      "await uibridge.execute('click', 'button', { position: 'topLeft', clickCount: 2 })"
     ],
     async execute(bridge, selector, options = {}) {
       const element = bridge.findElement(selector);
@@ -913,6 +902,12 @@ ${example}
   var screenshotCommand = {
     name: "screenshot",
     description: "Takes a screenshot of the page or a specific element",
+    examples: [
+      "execute('screenshot')",
+      "execute('screenshot', { format: 'png', quality: 0.9 })",
+      "execute('screenshot', { selector: '#main-content' })",
+      "execute('screenshot', { fullPage: true, saveConfig: { autoSave: true, folder: 'tests' } })"
+    ],
     parameters: [
       {
         name: "options",
@@ -920,11 +915,6 @@ ${example}
         required: false,
         description: "Screenshot options: { selector?, format?, quality?, fullPage?, saveConfig? }"
       }
-    ],
-    examples: [
-      "await uibridge.execute('screenshot')",
-      "await uibridge.execute('screenshot', { selector: '#main-content' })",
-      "await uibridge.execute('screenshot', { saveConfig: { folder: 'test-screenshots', autoSave: true } })"
     ],
     async execute(bridge, options = {}) {
       console.log("\u{1F5BC}\uFE0F [SCREENSHOT] Starting screenshot command execution");
@@ -1272,17 +1262,40 @@ ${example}
     }
   };
 
+  // src/commands/help.js
+  var helpCommand = {
+    name: "help",
+    description: "Get help information about UIBridge commands and usage patterns for AI automation",
+    examples: [
+      "execute('help')",
+      "execute('help', 'click')",
+      "execute('help', 'screenshot')",
+      "execute('--help')"
+    ],
+    parameters: [
+      {
+        name: "commandName",
+        type: "string",
+        required: false,
+        description: "Specific command to get help for (optional)"
+      }
+    ],
+    async execute(bridge, commandName = null) {
+      return bridge.getHelp(commandName);
+    }
+  };
+
   // src/core/UIBridge.js
-  var _UIBridge = class _UIBridge {
+  var UIBridge = class _UIBridge {
     constructor(config = {}) {
       this.config = {
         debug: false,
         allowedOrigins: ["*"],
-        commands: ["click", "screenshot"],
+        commands: ["click", "screenshot", "help"],
         generateCDI: true,
         enableHttpDiscovery: false,
         autoInit: true,
-        version: "0.1.0",
+        version: "1.0.0",
         // Screenshot save configuration
         defaultScreenshotConfig: {
           autoSave: false,
@@ -1303,7 +1316,7 @@ ${example}
       this._isInitialized = false;
       this._initStartTime = null;
       this._commandHistory = [];
-      if (this.config.autoInit && typeof window !== "undefined") {
+      if (this.config.autoInit && typeof window !== "undefined" && typeof document !== "undefined") {
         if (document.readyState === "loading") {
           document.addEventListener("DOMContentLoaded", () => this.init());
         } else {
@@ -1320,7 +1333,7 @@ ${example}
         this._log("UIBridge already initialized");
         return;
       }
-      this._initStartTime = performance.now();
+      this._initStartTime = typeof performance !== "undefined" ? performance.now() : Date.now();
       this._log("Initializing UIBridge...", this.config);
       try {
         await this._registerCoreCommands();
@@ -1328,7 +1341,7 @@ ${example}
         this._setupDiscovery();
         this._setupGlobalAPI();
         this._isInitialized = true;
-        const initTime = performance.now() - this._initStartTime;
+        const initTime = (typeof performance !== "undefined" ? performance.now() : Date.now()) - this._initStartTime;
         this._log(`UIBridge initialized successfully in ${initTime.toFixed(2)}ms`, {
           commands: this.registry.getNames(),
           version: this.config.version
@@ -1353,14 +1366,18 @@ ${example}
      * @returns {Promise<any>} Command result
      */
     async execute(commandName, ...args) {
+      if (commandName === "help" || commandName === "--help") {
+        return this.getHelp(args[0]);
+      }
       if (!this._isInitialized) {
         throw new Error("UIBridge not initialized. Call init() first.");
       }
       const command = this.registry.get(commandName);
       if (!command) {
-        throw new Error(`Unknown command: ${commandName}. Available commands: ${this.registry.getNames().join(", ")}`);
+        const available = this.registry.getAll().map((cmd) => cmd.name).join(", ");
+        throw new Error(`Unknown command: ${commandName}. Available commands: ${available}. Use 'help' for detailed information.`);
       }
-      const startTime = performance.now();
+      const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
       const executionId = this._generateExecutionId();
       this._log(`Executing command: ${commandName}`, { args, executionId });
       try {
@@ -1373,7 +1390,7 @@ ${example}
         };
         this._commandHistory.push(historyEntry);
         const result = await command.execute(this, ...args);
-        const endTime = performance.now();
+        const endTime = typeof performance !== "undefined" ? performance.now() : Date.now();
         const duration = endTime - startTime;
         historyEntry.status = "completed";
         historyEntry.duration = duration;
@@ -1387,9 +1404,23 @@ ${example}
           duration,
           executionId
         });
-        return result;
+        const enhancedResult = {
+          ...result,
+          command: commandName,
+          duration,
+          timestamp: (/* @__PURE__ */ new Date()).toISOString()
+        };
+        this._addToHistory({
+          command: commandName,
+          args,
+          result: enhancedResult,
+          duration,
+          timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+          status: "completed"
+        });
+        return enhancedResult;
       } catch (error) {
-        const endTime = performance.now();
+        const endTime = typeof performance !== "undefined" ? performance.now() : Date.now();
         const duration = endTime - startTime;
         const historyEntry = this._commandHistory[this._commandHistory.length - 1];
         if (historyEntry && historyEntry.id === executionId) {
@@ -1405,6 +1436,14 @@ ${example}
           error: error.message,
           duration,
           executionId
+        });
+        this._addToHistory({
+          command: commandName,
+          args,
+          error: error.message,
+          duration,
+          timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+          status: "failed"
         });
         throw error;
       }
@@ -1464,7 +1503,7 @@ ${example}
         commandCount: this.registry.size(),
         historyLength: this._commandHistory.length,
         config: { ...this.config },
-        uptime: this._initStartTime ? performance.now() - this._initStartTime : 0
+        uptime: this._initStartTime ? (typeof performance !== "undefined" ? performance.now() : Date.now()) - this._initStartTime : 0
       };
     }
     /**
@@ -1519,7 +1558,8 @@ ${example}
     async _registerCoreCommands() {
       const commands = [
         { name: "click", implementation: clickCommand },
-        { name: "screenshot", implementation: screenshotCommand }
+        { name: "screenshot", implementation: screenshotCommand },
+        { name: "help", implementation: helpCommand }
       ];
       for (const { name: name2, implementation } of commands) {
         if (this.config.commands.includes(name2)) {
@@ -1612,9 +1652,279 @@ ${example}
         console.log("[UIBridge]", ...args);
       }
     }
+    /**
+     * Get help information for commands - AI-friendly format
+     * @param {string} commandName - Specific command to get help for, or null for general help
+     * @returns {object} Help information structured for AI agents and developers
+     */
+    getHelp(commandName = null) {
+      if (commandName) {
+        const command = this.registry.get(commandName);
+        if (!command) {
+          const available = this.registry.getAll().map((cmd) => cmd.name).join(", ");
+          return {
+            error: `Unknown command: ${commandName}`,
+            availableCommands: available,
+            suggestion: `Use 'help' without arguments to see all commands`,
+            aiGuidance: `AI Agents: Use execute('help') to discover available commands or check spelling of '${commandName}'`
+          };
+        }
+        return {
+          command: command.name,
+          description: command.description,
+          parameters: command.parameters,
+          examples: command.examples || [],
+          usage: this._generateUsage(command),
+          aiTips: this._getAITipsForCommand(command.name)
+        };
+      }
+      const commands = this.registry.getAll();
+      return {
+        framework: "UIBridge",
+        version: this.config.version || "1.0.0",
+        description: "In-app automation framework for web applications - designed for AI agent control",
+        // AI Quick Start Guide
+        aiQuickStart: {
+          step1: "Execute commands using: await uibridge.execute('commandName', ...args)",
+          step2: "Find elements using selectors: CSS, text content, test IDs, XPath",
+          step3: "Handle errors with try/catch blocks",
+          step4: "Use await for all commands as they return promises"
+        },
+        // Core commands with AI usage patterns
+        commands: commands.map((cmd) => ({
+          name: cmd.name,
+          description: cmd.description,
+          parameters: cmd.parameters.length,
+          usage: this._generateUsage(cmd),
+          aiUseCase: this._getAIUseCase(cmd.name)
+        })),
+        // AI-optimized automation patterns
+        automationPatterns: {
+          "Click any button": {
+            pattern: "execute('click', selector)",
+            examples: [
+              "execute('click', '#submit')",
+              "execute('click', { text: 'Submit' })",
+              "execute('click', { testId: 'submit-btn' })"
+            ],
+            aiTip: "Try multiple selector strategies if one fails"
+          },
+          "Take screenshots": {
+            pattern: "execute('screenshot', options)",
+            examples: [
+              "execute('screenshot', { fullPage: true })",
+              "execute('screenshot', { selector: '#content' })",
+              "execute('screenshot', { saveConfig: { autoSave: true } })"
+            ],
+            aiTip: "Screenshots are useful for verification and debugging"
+          },
+          "Discover available actions": {
+            pattern: "discover() or execute('help')",
+            examples: [
+              "const commands = uibridge.discover()",
+              "const help = await uibridge.execute('help')"
+            ],
+            aiTip: "Use this to understand what actions are available"
+          }
+        },
+        // Selector strategies for AI agents
+        selectorStrategies: {
+          priority: "Try strategies in this order for best results",
+          strategies: {
+            1: { method: "Test ID", syntax: "{ testId: 'element-id' }", reliability: "highest" },
+            2: { method: "CSS ID", syntax: "'#element-id'", reliability: "high" },
+            3: { method: "CSS Class", syntax: "'.class-name'", reliability: "medium" },
+            4: { method: "Text Content", syntax: "{ text: 'Button Text' }", reliability: "medium" },
+            5: { method: "Aria Label", syntax: "{ ariaLabel: 'Button Label' }", reliability: "medium" },
+            6: { method: "XPath", syntax: `{ xpath: '//button[text()="Submit"]' }`, reliability: "advanced" }
+          }
+        },
+        // AI automation best practices
+        aiBestPractices: [
+          "Always use await when executing commands",
+          "Wrap commands in try/catch blocks for error handling",
+          "Use specific selectors (ID, testId) when possible",
+          "Take screenshots to verify actions completed successfully",
+          "Use help('commandName') to understand specific command options",
+          "Check element existence before interaction",
+          "Wait for dynamic content to load before acting"
+        ],
+        // Error handling guide for AI
+        errorHandling: {
+          "Element not found": {
+            solution: "Try different selector strategies or wait for element to appear",
+            code: "try { await execute('click', '#btn'); } catch(e) { await execute('click', {text: 'Submit'}); }"
+          },
+          "Command failed": {
+            solution: "Check command syntax and parameters",
+            code: "const help = await execute('help', 'click'); console.log(help.usage);"
+          },
+          "Screenshot failed": {
+            solution: "Ensure element is visible and page is loaded",
+            code: "await execute('screenshot', { selector: 'body', fullPage: true });"
+          }
+        },
+        // Workflow patterns for AI agents
+        workflowPatterns: {
+          "Form submission": [
+            "1. Find and fill input fields",
+            "2. Click submit button",
+            "3. Take screenshot to verify",
+            "Example: execute('click', { text: 'Submit' })"
+          ],
+          "Navigation and verification": [
+            "1. Take screenshot of current state",
+            "2. Click navigation element",
+            "3. Wait for page load",
+            "4. Take screenshot to verify navigation"
+          ],
+          "Content interaction": [
+            "1. Find target element using multiple selector strategies",
+            "2. Execute action (click, screenshot, etc.)",
+            "3. Verify result with screenshot or status check"
+          ]
+        },
+        // PowerShell REST API patterns for external AI agents
+        powershellPatterns: {
+          "Basic Click Command": {
+            description: "Execute click action via PowerShell REST API",
+            code: `$params = @{
+    Uri = 'http://localhost:3001/execute-command'
+    Method = 'POST'
+    Headers = @{ 'Content-Type' = 'application/json' }
+    Body = @{
+        command = 'click'
+        selector = '#submit-button'
+    } | ConvertTo-Json
+}
+$response = Invoke-RestMethod @params`
+          },
+          "Screenshot with Auto-Save": {
+            description: "Take screenshot and save automatically",
+            code: `$params = @{
+    Uri = 'http://localhost:3001/execute-command'
+    Method = 'POST'
+    Headers = @{ 'Content-Type' = 'application/json' }
+    Body = @{
+        command = 'screenshot'
+        options = @{
+            fullPage = $true
+            saveConfig = @{
+                autoSave = $true
+                folder = 'ai-automation'
+                timestamp = $true
+            }
+        }
+    } | ConvertTo-Json -Depth 4
+}
+$response = Invoke-RestMethod @params`
+          },
+          "Reusable Function": {
+            description: "Create reusable PowerShell function for UIBridge commands",
+            code: `function Invoke-UIBridgeCommand {
+    param([string]$Command, [hashtable]$Parameters = @{})
+    
+    $params = @{
+        Uri = 'http://localhost:3001/execute-command'
+        Method = 'POST'
+        Headers = @{ 'Content-Type' = 'application/json' }
+        Body = (@{ command = $Command } + $Parameters) | ConvertTo-Json -Depth 4
+    }
+    
+    try {
+        return Invoke-RestMethod @params
+    } catch {
+        Write-Error "UIBridge command failed: $_"
+        throw
+    }
+}
+
+# Usage:
+Invoke-UIBridgeCommand -Command 'click' -Parameters @{selector='#btn'}`
+          }
+        },
+        // External API information
+        restApiInfo: {
+          server: "Start with: node server-example.cjs",
+          baseUrl: "http://localhost:3001",
+          endpoints: {
+            executeCommand: "POST /execute-command",
+            getStatus: "GET /status",
+            getHelp: "GET /discover-commands"
+          },
+          powershellTips: [
+            "Always use Invoke-RestMethod with hashtable splatting",
+            "Include proper error handling with try/catch blocks",
+            "Use ConvertTo-Json -Depth 4 for nested objects",
+            "Store common configuration in reusable variables"
+          ]
+        }
+      };
+    }
+    /**
+     * Get AI-specific tips for a command
+     * @private
+     */
+    _getAITipsForCommand(commandName) {
+      const tips = {
+        click: [
+          "Try multiple selector strategies if element not found",
+          "Use force: true option if element is covered",
+          "Consider scroll behavior - element might be off-screen",
+          "PowerShell API: Use selector parameter in request body"
+        ],
+        screenshot: [
+          "Use fullPage: true for complete page capture",
+          "Specify selector for element-specific screenshots",
+          "Set saveConfig for automatic file saving",
+          "PowerShell API: Use -Depth 4 with ConvertTo-Json for nested options"
+        ],
+        help: [
+          "Use without arguments for full command list",
+          "Specify command name for detailed help",
+          "Check usage examples for proper syntax",
+          "PowerShell API: Available at GET /discover-commands endpoint"
+        ]
+      };
+      return tips[commandName] || ["Execute with proper await syntax", "Handle errors with try/catch"];
+    }
+    /**
+     * Get AI use case for a command
+     * @private
+     */
+    _getAIUseCase(commandName) {
+      const useCases = {
+        click: "Interact with buttons, links, form elements, and any clickable UI component",
+        screenshot: "Capture visual state for verification, debugging, or documentation",
+        help: "Discover available commands and learn proper usage syntax"
+      };
+      return useCases[commandName] || "General automation command";
+    }
+    /**
+     * Generate usage string for a command
+     * @private
+     */
+    _generateUsage(command) {
+      const params = command.parameters.map((p) => {
+        const name2 = p.required ? p.name : `[${p.name}]`;
+        return name2;
+      }).join(", ");
+      return `execute('${command.name}'${params ? ", " + params : ""})`;
+    }
+    /**
+     * Add command to execution history
+     * @private
+     */
+    _addToHistory(entry) {
+      if (!this._commandHistory) {
+        this._commandHistory = [];
+      }
+      this._commandHistory.unshift(entry);
+      if (this._commandHistory.length > 50) {
+        this._commandHistory = this._commandHistory.slice(0, 50);
+      }
+    }
   };
-  __name(_UIBridge, "UIBridge");
-  var UIBridge = _UIBridge;
   if (typeof window !== "undefined" && !window.UIBridge) {
     window.UIBridge = UIBridge;
   }
@@ -1628,14 +1938,12 @@ ${example}
       ...config
     });
   }
-  __name(createUIBridge, "createUIBridge");
   async function initUIBridge(config = {}) {
     const bridge = createUIBridge(config);
     await bridge.init();
     return bridge;
   }
-  __name(initUIBridge, "initUIBridge");
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && typeof document !== "undefined") {
     if (!window.uibridge) {
       const defaultInstance = createUIBridge({
         debug: false,
@@ -1644,13 +1952,13 @@ ${example}
       });
       window.uibridge = defaultInstance;
       window.UIBridge = UIBridge;
-      if (window.location.hostname === "localhost") {
+      if (true) {
         window.createUIBridge = createUIBridge;
         window.initUIBridge = initUIBridge;
       }
     }
   }
-  var version = "0.1.0";
+  var version = "1.0.0";
   var name = "UIBridge";
   var src_default = UIBridge;
   return __toCommonJS(src_exports);
