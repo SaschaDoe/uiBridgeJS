@@ -4,9 +4,10 @@
  * and save them to actual file system locations.
  * 
  * Usage:
- * 1. npm install express cors fs-extra
- * 2. node server-example.js
- * 3. Configure UIBridge with serverEndpoint: 'http://localhost:3001/save-screenshot'
+ * 1. node node_modules/@sashbot/uibridge/server-example.cjs
+ * 2. Configure UIBridge with serverEndpoint: 'http://localhost:3001/save-screenshot'
+ * 
+ * Dependencies (express, cors, fs-extra) are included with the package.
  */
 
 const express = require('express');

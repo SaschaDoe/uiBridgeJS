@@ -450,10 +450,9 @@ function printPowerShellPatterns() {
   printHeader('PowerShell REST API for AI Agents');
   
   printSection('Server Setup',
-    'First, start the UIBridge REST API server:\n' +
-    '  npm install express cors fs-extra\n' +
-    '  node server-example.cjs\n\n' +
-    'Server runs on http://localhost:3001'
+    'Start the UIBridge REST API server (dependencies included):\n' +
+    '  node node_modules/@sashbot/uibridge/server-example.cjs\n\n' +
+    'Server runs on http://localhost:3001 by default'
   );
 
   printCodeBlock('Basic PowerShell Click Command', 
