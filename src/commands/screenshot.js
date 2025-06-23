@@ -70,8 +70,13 @@ export const screenshotCommand = {
       
       // Load html2canvas library if not already loaded
       console.log('🖼️ [SCREENSHOT] Loading html2canvas...');
-      await this._ensureHtml2Canvas();
-      console.log('🖼️ [SCREENSHOT] html2canvas loaded:', !!window.html2canvas);
+      try {
+        await this._ensureHtml2Canvas();
+        console.log('🖼️ [SCREENSHOT] html2canvas loaded:', !!window.html2canvas);
+      } catch (loadError) {
+        console.error('🖼️ [SCREENSHOT] Failed to load html2canvas:', loadError.message);
+        throw new Error(`Failed to load html2canvas library: ${loadError.message}. Please ensure you have internet connectivity or consider using a different screenshot method.`);
+      }
       
       // Temporarily hide excluded elements
       const hiddenElements = this._hideElements(opts.excludeSelectors);
@@ -98,8 +103,13 @@ export const screenshotCommand = {
       console.log('🖼️ [SCREENSHOT] html2canvas options:', JSON.stringify(html2canvasOptions, null, 2));
       console.log('🖼️ [SCREENSHOT] Starting html2canvas capture...');
       
-      // Capture the screenshot
-      const canvas = await window.html2canvas(targetElement, html2canvasOptions);
+      // Capture the screenshot with timeout
+      const canvas = await Promise.race([
+        window.html2canvas(targetElement, html2canvasOptions),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Screenshot capture timed out after 30 seconds')), 30000)
+        )
+      ]);
       
       console.log('🖼️ [SCREENSHOT] Canvas created:', {
         width: canvas.width,
@@ -357,37 +367,62 @@ export const screenshotCommand = {
     if (window.html2canvas) return;
     
     return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-      script.integrity = 'sha512-dK1lSuLiS6pQ6nrGT7iQFmQ5xOFCHBcynHgSc1h5tEGE6a86/30XnRrOXKmr5AZ+z3OqQQ4SdMzS0i1h1D5w3g==';
-      script.crossOrigin = 'anonymous';
+      // Multiple CDN sources for reliability
+      const cdnSources = [
+        'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+        'https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js',
+        'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'
+      ];
       
-      script.onload = () => {
-        if (window.html2canvas) {
-          resolve();
-        } else {
-          reject(new Error('html2canvas failed to load properly'));
+      let currentIndex = 0;
+      
+      const tryLoadScript = () => {
+        if (currentIndex >= cdnSources.length) {
+          reject(new Error('Failed to load html2canvas from all CDN sources'));
+          return;
         }
+        
+        const script = document.createElement('script');
+        script.src = cdnSources[currentIndex];
+        script.crossOrigin = 'anonymous';
+        
+        script.onload = () => {
+          // Add a small delay to ensure the library is fully initialized
+          setTimeout(() => {
+            if (window.html2canvas && typeof window.html2canvas === 'function') {
+              console.log('🖼️ [SCREENSHOT] html2canvas loaded successfully from:', cdnSources[currentIndex]);
+              resolve();
+            } else {
+              console.warn('🖼️ [SCREENSHOT] html2canvas loaded but not functional, trying next source...');
+              currentIndex++;
+              tryLoadScript();
+            }
+          }, 100);
+        };
+        
+        script.onerror = () => {
+          console.warn('🖼️ [SCREENSHOT] Failed to load html2canvas from:', cdnSources[currentIndex]);
+          currentIndex++;
+          tryLoadScript();
+        };
+        
+        // Check if script with same src is already being loaded
+        const existingScript = document.querySelector(`script[src="${cdnSources[currentIndex]}"]`);
+        if (existingScript) {
+          // Wait for existing script to load
+          if (window.html2canvas && typeof window.html2canvas === 'function') {
+            resolve();
+          } else {
+            existingScript.onload = script.onload;
+            existingScript.onerror = script.onerror;
+          }
+          return;
+        }
+        
+        document.head.appendChild(script);
       };
       
-      script.onerror = () => {
-        reject(new Error('Failed to load html2canvas library'));
-      };
-      
-      // Check if script is already being loaded
-      const existingScript = document.querySelector('script[src*="html2canvas"]');
-      if (existingScript) {
-        // Wait for existing script to load
-        if (window.html2canvas) {
-          resolve();
-        } else {
-          existingScript.onload = resolve;
-          existingScript.onerror = reject;
-        }
-        return;
-      }
-      
-      document.head.appendChild(script);
+      tryLoadScript();
     });
   },
 

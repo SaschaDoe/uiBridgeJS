@@ -41,10 +41,11 @@ async function initBrowser() {
       await page.evaluate(uibridgeCode);
       await page.evaluate(() => {
         if (typeof UIBridge !== 'undefined') {
-          window.uibridge = new UIBridge();
+          window.uibridge = new UIBridge({ debug: true });
+          return window.uibridge.init();
         }
       });
-      console.log('✅ UIBridge loaded into browser');
+      console.log('✅ UIBridge loaded and initialized in browser');
     }
   }
   return { browser, page };
@@ -80,7 +81,8 @@ app.post('/navigate', async (req, res) => {
       await page.evaluate(uibridgeCode);
       await page.evaluate(() => {
         if (typeof UIBridge !== 'undefined') {
-          window.uibridge = new UIBridge();
+          window.uibridge = new UIBridge({ debug: true });
+          return window.uibridge.init();
         }
       });
     }
@@ -154,43 +156,39 @@ app.post('/execute', async (req, res) => {
     } else if (command === 'screenshot') {
       
       try {
-        const screenshotOptions = {
-          type: options.format || 'png',
-          quality: options.quality,
-          fullPage: options.fullPage || false
-        };
+        // Use UIBridge screenshot functionality
+        result = await page.evaluate(async (opts) => {
+          try {
+            if (!window.uibridge) {
+              throw new Error('UIBridge not initialized');
+            }
+            return await window.uibridge.execute('screenshot', opts);
+          } catch (error) {
+            return {
+              success: false,
+              error: error.message,
+              timestamp: new Date().toISOString()
+            };
+          }
+        }, options);
         
-        let screenshotBuffer;
-        
-        if (options.selector) {
-          // Element screenshot
-          const element = await page.locator(options.selector);
-          screenshotBuffer = await element.screenshot(screenshotOptions);
-        } else {
-          // Full page screenshot
-          screenshotBuffer = await page.screenshot(screenshotOptions);
+        // If UIBridge screenshot succeeded and has dataUrl, optionally save to server
+        if (result.success && result.dataUrl) {
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const filename = `screenshot-${timestamp}.${result.format || 'png'}`;
+          const filepath = path.join(SCREENSHOTS_DIR, filename);
+          
+          // Convert dataUrl to buffer and save
+          const base64Data = result.dataUrl.split(',')[1];
+          const buffer = Buffer.from(base64Data, 'base64');
+          await fs.writeFile(filepath, buffer);
+          
+          // Add server file info to result
+          result.serverFilename = filename;
+          result.serverFilepath = filepath;
+          
+          console.log(`📸 Screenshot saved: ${filename} (${result.size} bytes)`);
         }
-        
-        // Save screenshot
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `screenshot-${timestamp}.${screenshotOptions.type}`;
-        const filepath = path.join(SCREENSHOTS_DIR, filename);
-        
-        await fs.writeFile(filepath, screenshotBuffer);
-        
-        // Convert to base64 for response
-        const base64 = screenshotBuffer.toString('base64');
-        const dataUrl = `data:image/${screenshotOptions.type};base64,${base64}`;
-        
-        result = {
-          success: true,
-          command: 'screenshot',
-          filename,
-          filepath,
-          dataUrl,
-          size: screenshotBuffer.length,
-          timestamp: new Date().toISOString()
-        };
         
       } catch (screenshotError) {
         result = {

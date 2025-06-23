@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIBridge Screenshot Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .error {
+            background: #f44336;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .screenshot-preview {
+            max-width: 100%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ UIBridge Screenshot Fix Test</h1>
+        <p>This page tests the improved html2canvas loading functionality in UIBridge.</p>
+        
+        <div class="test-section">
+            <h2>Test Controls</h2>
+            <button onclick="testBasicScreenshot()">📸 Basic Screenshot</button>
+            <button onclick="testFullPageScreenshot()">📄 Full Page Screenshot</button>
+            <button onclick="testElementScreenshot()">🎯 Element Screenshot</button>
+            <button onclick="testLibraryLoading()">🔄 Test Library Loading</button>
+            <button onclick="clearResults()">🗑️ Clear Results</button>
+        </div>
+        
+        <div class="test-section" id="main-content">
+            <h2>Test Content</h2>
+            <p>This is some test content that will be captured in screenshots.</p>
+            <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px;">
+                <h3>Sample Content Block</h3>
+                <p>This content has some styling and should appear in the screenshot.</p>
+                <ul>
+                    <li>Item 1</li>
+                    <li>Item 2</li>
+                    <li>Item 3</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Results</h2>
+            <div id="status" class="status">Ready to test screenshot functionality...</div>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <!-- Load UIBridge -->
+    <script src="dist/uibridge.min.js"></script>
+    
+    <script>
+        let uibridge;
+        
+        // Initialize UIBridge
+        async function initUIBridge() {
+            try {
+                updateStatus('Initializing UIBridge...');
+                uibridge = new UIBridge({ debug: true });
+                await uibridge.init();
+                updateStatus('UIBridge initialized successfully!');
+            } catch (error) {
+                updateStatus('UIBridge initialization failed: ' + error.message, 'error');
+            }
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            statusDiv.textContent = `[${timestamp}] ${message}`;
+            statusDiv.className = 'status ' + type;
+        }
+        
+        function addResult(message, type = 'info', data = null) {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = type;
+            resultDiv.textContent = message;
+            
+            if (data && data.dataUrl) {
+                const img = document.createElement('img');
+                img.src = data.dataUrl;
+                img.className = 'screenshot-preview';
+                img.style.maxWidth = '300px';
+                resultDiv.appendChild(img);
+            }
+            
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        async function testBasicScreenshot() {
+            try {
+                updateStatus('Testing basic screenshot...');
+                const result = await uibridge.execute('screenshot', {
+                    format: 'png',
+                    quality: 0.9
+                });
+                
+                if (result.success) {
+                    updateStatus('Basic screenshot successful!', 'success');
+                    addResult(`Screenshot captured: ${result.width}x${result.height} pixels`, 'success', result);
+                } else {
+                    updateStatus('Basic screenshot failed', 'error');
+                    addResult('Screenshot failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                updateStatus('Basic screenshot error: ' + error.message, 'error');
+                addResult('Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function testFullPageScreenshot() {
+            try {
+                updateStatus('Testing full page screenshot...');
+                const result = await uibridge.execute('screenshot', {
+                    fullPage: true,
+                    format: 'png'
+                });
+                
+                if (result.success) {
+                    updateStatus('Full page screenshot successful!', 'success');
+                    addResult(`Full page screenshot: ${result.width}x${result.height} pixels`, 'success', result);
+                } else {
+                    updateStatus('Full page screenshot failed', 'error');
+                    addResult('Full page screenshot failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                updateStatus('Full page screenshot error: ' + error.message, 'error');
+                addResult('Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function testElementScreenshot() {
+            try {
+                updateStatus('Testing element screenshot...');
+                const result = await uibridge.execute('screenshot', {
+                    selector: '#main-content',
+                    format: 'png'
+                });
+                
+                if (result.success) {
+                    updateStatus('Element screenshot successful!', 'success');
+                    addResult(`Element screenshot: ${result.width}x${result.height} pixels`, 'success', result);
+                } else {
+                    updateStatus('Element screenshot failed', 'error');
+                    addResult('Element screenshot failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                updateStatus('Element screenshot error: ' + error.message, 'error');
+                addResult('Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function testLibraryLoading() {
+            try {
+                updateStatus('Testing html2canvas library loading...');
+                
+                // Remove existing html2canvas if present
+                if (window.html2canvas) {
+                    delete window.html2canvas;
+                    updateStatus('Cleared existing html2canvas, testing fresh load...');
+                }
+                
+                // Force reload by calling the internal method
+                const screenshotCommand = uibridge.registry.get('screenshot');
+                await screenshotCommand._ensureHtml2Canvas();
+                
+                if (window.html2canvas) {
+                    updateStatus('html2canvas loaded successfully!', 'success');
+                    addResult('Library loading test passed - html2canvas is available', 'success');
+                } else {
+                    updateStatus('html2canvas failed to load', 'error');
+                    addResult('Library loading test failed - html2canvas not available', 'error');
+                }
+            } catch (error) {
+                updateStatus('Library loading test error: ' + error.message, 'error');
+                addResult('Library loading error: ' + error.message, 'error');
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            updateStatus('Results cleared');
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', initUIBridge);
+    </script>
+</body>
+</html> 
