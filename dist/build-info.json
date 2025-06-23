@@ -2,7 +2,7 @@
   "name": "@sashbot/uibridge",
   "version": "1.0.0",
   "description": "In-app automation framework for web applications - enables LLMs to control and interact with running web apps",
-  "built": "2025-06-22T05:17:10.051Z",
+  "built": "2025-06-23T01:54:22.647Z",
   "formats": {
     "umd": "uibridge.min.js",
     "esm": "uibridge.esm.js",
