@@ -17,7 +17,13 @@ export class UIBridge {
       generateCDI: true,
       enableHttpDiscovery: false,
       autoInit: true,
-      version: '1.2.6',
+              version: '1.3.2',
+      
+      // Remote control configuration (NEW)
+      enableRemoteControl: false,
+      serverUrl: 'http://localhost:3002',
+      pollInterval: 500, // ms between polls
+      autoStartPolling: true,
       
       // Screenshot save configuration
       defaultScreenshotConfig: {
@@ -40,6 +46,8 @@ export class UIBridge {
     this._isInitialized = false;
     this._initStartTime = null;
     this._commandHistory = [];
+    this._isPolling = false;
+    this._pollTimeoutId = null;
     
     // Auto-initialize if configured - only in browser environment
     if (this.config.autoInit && typeof window !== 'undefined' && typeof document !== 'undefined') {
@@ -91,11 +99,17 @@ export class UIBridge {
         this._generateCDI();
       }
       
+      // Start remote control polling if enabled
+      if (this.config.enableRemoteControl && this.config.autoStartPolling) {
+        this.startRemoteControl();
+      }
+      
       // Dispatch initialization event
       this._dispatchEvent('uibridge:initialized', {
         version: this.config.version,
         commands: this.registry.getNames(),
-        initTime
+        initTime,
+        remoteControlEnabled: this.config.enableRemoteControl
       });
       
     } catch (error) {
@@ -753,6 +767,167 @@ Invoke-UIBridgeCommand -Command 'click' -Parameters @{selector='#btn'}`
     if (this._commandHistory.length > 50) {
       this._commandHistory = this._commandHistory.slice(0, 50);
     }
+  }
+
+  /**
+   * Start remote control polling
+   * This automatically checks for commands from the server
+   */
+  startRemoteControl() {
+    if (this._isPolling) {
+      this._log('Remote control already running');
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      this._log('Remote control not available in non-browser environment');
+      return;
+    }
+
+    this._isPolling = true;
+    this._log(`Starting remote control polling: ${this.config.serverUrl}`);
+    
+    // Make UIBridge globally available for the server
+    window.uibridge = this;
+    
+    this._pollForCommands();
+  }
+
+  /**
+   * Stop remote control polling
+   */
+  stopRemoteControl() {
+    if (!this._isPolling) {
+      return;
+    }
+
+    this._isPolling = false;
+    if (this._pollTimeoutId) {
+      clearTimeout(this._pollTimeoutId);
+      this._pollTimeoutId = null;
+    }
+    
+    this._log('Remote control polling stopped');
+  }
+
+  /**
+   * Poll for commands from the server
+   * @private
+   */
+  async _pollForCommands() {
+    if (!this._isPolling) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${this.config.serverUrl}/pending-commands`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.success && data.commands && data.commands.length > 0) {
+          this._log(`Received ${data.commands.length} command(s) from server`);
+          
+          for (const command of data.commands) {
+            await this._executeRemoteCommand(command);
+          }
+        }
+      }
+    } catch (error) {
+      // Server might not be running yet or network error - that's ok
+      if (this.config.debug) {
+        this._log('Poll failed (server may not be running):', error.message);
+      }
+    }
+
+    // Schedule next poll
+    if (this._isPolling) {
+      this._pollTimeoutId = setTimeout(() => {
+        this._pollForCommands();
+      }, this.config.pollInterval);
+    }
+  }
+
+  /**
+   * Execute a command received from the server
+   * @param {Object} commandData - Command data from server
+   * @private
+   */
+  async _executeRemoteCommand(commandData) {
+    const { id, command, selector, options } = commandData;
+    
+    this._log(`Executing remote command: ${command}`, { id, selector, options });
+
+    try {
+      let result;
+      
+      // Execute the command based on type
+      if (command === 'click') {
+        result = await this.execute('click', selector, options);
+      } else if (command === 'screenshot') {
+        result = await this.execute('screenshot', options);
+      } else {
+        // Generic command execution
+        const args = [];
+        if (selector !== undefined) args.push(selector);
+        if (options !== undefined) args.push(options);
+        result = await this.execute(command, ...args);
+      }
+
+      // Send success result back to server
+      await this._sendCommandResult(id, { success: true, result });
+      
+      this._log(`Remote command ${command} executed successfully`, result);
+      
+    } catch (error) {
+      this._log(`Remote command ${command} failed:`, error);
+      
+      // Send error result back to server
+      await this._sendCommandResult(id, { 
+        success: false, 
+        error: error.message 
+      });
+    }
+  }
+
+  /**
+   * Send command result back to the server
+   * @param {string} commandId - Command ID
+   * @param {Object} result - Result data
+   * @private
+   */
+  async _sendCommandResult(commandId, result) {
+    try {
+      await fetch(`${this.config.serverUrl}/command-result`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          commandId,
+          ...result
+        })
+      });
+    } catch (error) {
+      this._log('Failed to send command result:', error);
+    }
+  }
+
+  /**
+   * Get remote control status
+   */
+  getRemoteControlStatus() {
+    return {
+      enabled: this.config.enableRemoteControl,
+      polling: this._isPolling,
+      serverUrl: this.config.serverUrl,
+      pollInterval: this.config.pollInterval
+    };
   }
 
 

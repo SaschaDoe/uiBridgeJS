@@ -67,12 +67,7 @@ function copyServerFiles() {
     {
       source: 'api-server.cjs',
       dest: 'uibridge-api-server.cjs',
-      description: 'Full-featured API server (recommended for automation)'
-    },
-    {
-      source: 'server-example.cjs',
-      dest: 'uibridge-queue-server.cjs',
-      description: 'Queue-only server example'
+      description: 'UIBridge API server - Executes commands directly with Playwright'
     },
     {
       source: 'test-screenshot-fix.html',
