@@ -5,12 +5,22 @@
 [![npm version](https://badge.fury.io/js/@sashbot/uibridge.svg)](https://www.npmjs.com/package/@sashbot/uibridge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🚀 NEW in v1.3.0: Zero-Configuration Remote Control
+## 🚀 NEW in v1.3.0: AI-Optimized Automation
 
-UIBridge now includes **built-in auto-polling** that eliminates the need for manual polling code. What used to require 50+ lines of boilerplate is now just one config option!
+UIBridge now includes **simplified PowerShell helpers** that make AI automation incredibly easy. What used to require complex REST calls is now simple function calls!
+
+```powershell
+# ✅ NEW AI-FRIENDLY WAY - Copy helper file to your project
+. .\uibridge-powershell-helpers.ps1
+
+# Complete automation in 3 lines:
+Start-UIBridgeSession -Url "http://localhost:5173"    # Setup + navigate + screenshot
+Click-UIBridgeText -Text "Submit"                     # Click button by text
+Take-UIBridgeScreenshot                               # Verify with screenshot
+```
 
 ```javascript
-// ✅ NEW WAY - All you need for remote control
+// ✅ Enable in your web app - All you need for remote control
 const uibridge = new UIBridge({ 
   enableRemoteControl: true  // 🎯 That's it!
 });
@@ -18,7 +28,7 @@ await uibridge.init();
 // 🤖 External automation now works automatically!
 ```
 
-📖 **[Complete Migration Guide](./documentation/ssd.md)** | 🚀 **[PowerShell Examples](./CURSOR_AI_USAGE_RULES.md)**
+📖 **[Complete Migration Guide](./documentation/ssd.md)** | 🚀 **[PowerShell Helpers](./uibridge-powershell-helpers.ps1)**
 
 ## ⚡ Quick Start
 
@@ -45,19 +55,15 @@ const uibridge = new UIBridge({
 await uibridge.init();
 ```
 
-### 4. External Automation (PowerShell/AI)
+### 4. External Automation (PowerShell/AI) - **RECOMMENDED**
 ```powershell
-# Commands work immediately - no setup needed in web app
-$params = @{
-    Uri = 'http://localhost:3002/execute'
-    Method = 'POST'
-    Headers = @{ 'Content-Type' = 'application/json' }
-    Body = @{
-        command = 'click'
-        selector = '#submit-button'
-    } | ConvertTo-Json
-}
-$response = Invoke-RestMethod @params
+# ✅ Use the simplified PowerShell helpers (MUCH easier for AI agents)
+. .\uibridge-powershell-helpers.ps1
+
+# Complete automation in 3 simple commands:
+Start-UIBridgeSession -Url "http://localhost:5173"
+Click-UIBridgeText -Text "Submit"
+Take-UIBridgeScreenshot
 ```
 
 ## 🎯 Core Commands for AI Agents
@@ -210,69 +216,52 @@ export default {
 };
 ```
 
-## 🚀 PowerShell Automation for AI
+## 🚀 PowerShell Automation for AI - **SIMPLIFIED**
 
-### Reusable Functions
+### ⚡ Quick Setup (One-Time)
 ```powershell
-# Configuration
-$global:UIBridgeConfig = @{
-    BaseUri = 'http://localhost:3002'
-    Headers = @{ 'Content-Type' = 'application/json' }
-}
-
-function Invoke-UIBridgeCommand {
-    param([string]$Command, [hashtable]$Parameters = @{})
-    
-    $params = @{
-        Uri = "$($global:UIBridgeConfig.BaseUri)/execute"
-        Method = 'POST'
-        Headers = $global:UIBridgeConfig.Headers
-        Body = (@{ command = $Command } + $Parameters) | ConvertTo-Json -Depth 4
-    }
-    
-    try {
-        return Invoke-RestMethod @params
-    } catch {
-        Write-Error "UIBridge command failed: $_"
-        throw
-    }
-}
-
-# Usage examples:
-Invoke-UIBridgeCommand -Command 'click' -Parameters @{selector='#btn'}
-Invoke-UIBridgeCommand -Command 'screenshot' -Parameters @{options=@{fullPage=$true}}
+# Download the helper functions to your project
+# Copy uibridge-powershell-helpers.ps1 to your project folder
 ```
 
-### AI Workflow Example
+### 🎯 AI-Friendly Functions
 ```powershell
-function Start-AIAutomation {
-    Write-Host "🤖 Starting automation..."
-    
-    # Initial screenshot
-    $screenshot1 = Invoke-UIBridgeCommand -Command 'screenshot' -Parameters @{
-        options = @{
-            fullPage = $true
-            saveConfig = @{ prefix = 'initial'; timestamp = $true }
-        }
-    }
-    
-    # Execute action
-    Invoke-UIBridgeCommand -Command 'click' -Parameters @{
-        selector = @{ text = 'Submit' }
-    }
-    
-    # Verification screenshot
-    Start-Sleep -Seconds 2
-    $screenshot2 = Invoke-UIBridgeCommand -Command 'screenshot' -Parameters @{
-        options = @{
-            fullPage = $true
-            saveConfig = @{ prefix = 'after-click'; timestamp = $true }
-        }
-    }
-    
-    Write-Host "✅ Automation completed!"
-}
+# Load helpers (do this once per session)
+. .\uibridge-powershell-helpers.ps1
+
+# Essential commands for AI agents:
+Test-UIBridgeServer                          # Check if server is running
+Open-UIBridgePage -Url "https://example.com" # Navigate to page
+Take-UIBridgeScreenshot                      # Screenshot (auto-saves)
+Click-UIBridgeText -Text "Submit"            # Click by button text
+Click-UIBridgeElement -Selector "#btn"       # Click by CSS selector
+Get-UIBridgePageInfo                         # Get page title/URL
+Start-UIBridgeSession -Url "URL"             # Complete setup in one command
 ```
+
+### 🤖 AI Automation Pattern
+```powershell
+# Complete automation workflow - simple & reliable
+. .\uibridge-powershell-helpers.ps1
+
+# Start session (checks server + navigates + initial screenshot)
+$session = Start-UIBridgeSession -Url "http://localhost:5173"
+
+# Interact with the page
+Click-UIBridgeText -Text "Make Background Yellow"
+
+# Verify the change
+Take-UIBridgeScreenshot
+
+# Done! 🎉
+```
+
+### 🔍 Why This Is Better for AI Agents
+- **No JSON construction** - functions handle it internally
+- **Built-in error handling** - clear success/failure messages
+- **Automatic screenshots** - saved with timestamps
+- **Simple function names** - easy for AI to remember
+- **Rich console feedback** - colored output for debugging
 
 ## 🔍 Available Commands
 
@@ -339,10 +328,41 @@ curl -X POST http://localhost:3002/execute \
   -d '{"command": "screenshot", "options": {"fullPage": true}}'
 ```
 
+## 🤖 AI Agent Quick Rules
+
+**For Cursor/AI Tools - Use these simple patterns:**
+
+```powershell
+# 1. Always load helpers first
+. .\uibridge-powershell-helpers.ps1
+
+# 2. Start with session setup
+Start-UIBridgeSession -Url "YOUR_URL"
+
+# 3. Click elements by text (most reliable)
+Click-UIBridgeText -Text "Button Text"
+
+# 4. Take screenshots for verification
+Take-UIBridgeScreenshot
+
+# 5. Check server health if things fail
+Test-UIBridgeServer
+```
+
+**🎯 AI Success Pattern:**
+1. **Load helpers** → 2. **Start session** → 3. **Click/interact** → 4. **Take screenshot** → 5. **Done!**
+
+**⚠️ AI Common Mistakes to Avoid:**
+- Don't construct JSON manually - use the helper functions
+- Don't forget to load the helpers with `. .\uibridge-powershell-helpers.ps1`
+- Don't skip screenshots - they verify your actions worked
+- Don't use complex selectors - prefer text-based clicking
+
 ## 📚 Documentation & Support
 
 - **📖 Setup Guide**: [Simplified Setup Documentation](./documentation/ssd.md)
 - **🤖 AI Guide**: [CURSOR_AI_USAGE_RULES.md](./CURSOR_AI_USAGE_RULES.md)
+- **⚡ PowerShell Helpers**: `uibridge-powershell-helpers.ps1` (copy to your project)
 - **🛠️ API Reference**: Use `execute('help')` for built-in documentation
 - **🐛 Issues**: [GitHub Issues](https://github.com/sashbot/uibridge-js/issues)
 - **📦 NPM**: [@sashbot/uibridge](https://www.npmjs.com/package/@sashbot/uibridge)
@@ -350,10 +370,11 @@ curl -X POST http://localhost:3002/execute \
 ## 🎯 Key Benefits
 
 - **🚀 Zero Setup**: `enableRemoteControl: true` and you're done
-- **🤖 AI-Friendly**: Designed for LLM agents and automation tools
+- **🤖 AI-Optimized**: PowerShell helpers make automation 10x easier for AI agents
+- **⚡ Simple Commands**: `Click-UIBridgeText -Text "Submit"` instead of complex REST calls
 - **📱 Universal**: Works with any JavaScript framework
 - **🛡️ Reliable**: Built-in error handling and retry logic
-- **⚡ Fast**: Optimized polling with minimal overhead
+- **📸 Auto-Screenshots**: Every action can be verified visually
 - **🔒 Secure**: Standard HTTP communication, no special permissions needed
 
 ---
