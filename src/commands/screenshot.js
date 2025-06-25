@@ -30,7 +30,7 @@ export const screenshotCommand = {
       quality: 0.92,         // 0-1 for jpeg/webp
       fullPage: false,       // capture entire page
       excludeSelectors: [],  // elements to hide during capture
-      backgroundColor: null, // background color override
+      backgroundColor: 'auto', // 'auto' = detect from element, null = transparent, or specific color
       scale: window.devicePixelRatio || 1,
       
       // Enhanced save configuration
@@ -68,6 +68,13 @@ export const screenshotCommand = {
         scrollHeight: targetElement?.scrollHeight
       });
       
+      // Auto-detect background color if requested
+      let actualBackgroundColor = opts.backgroundColor;
+      if (opts.backgroundColor === 'auto') {
+        actualBackgroundColor = this._detectBackgroundColor(targetElement);
+        console.log('🖼️ [SCREENSHOT] Auto-detected background color:', actualBackgroundColor);
+      }
+      
       // Load html2canvas library if not already loaded
       console.log('🖼️ [SCREENSHOT] Loading html2canvas...');
       try {
@@ -85,7 +92,7 @@ export const screenshotCommand = {
       const html2canvasOptions = {
         useCORS: true,
         allowTaint: false,
-        backgroundColor: opts.backgroundColor,
+        backgroundColor: actualBackgroundColor,
         scale: opts.scale,
         logging: true, // Force logging for debugging
         width: opts.fullPage ? document.documentElement.scrollWidth : undefined,
@@ -525,5 +532,52 @@ export const screenshotCommand = {
     } catch (error) {
       console.warn('Failed to auto-download screenshot:', error);
     }
+  },
+
+  /**
+   * Detect actual background color from element and its parents
+   * @param {Element} element - Target element
+   * @returns {string|null} Detected background color or null for transparent
+   * @private
+   */
+  _detectBackgroundColor(element) {
+    let currentElement = element;
+    
+    // Walk up the DOM tree to find the first non-transparent background
+    while (currentElement && currentElement !== document.documentElement) {
+      const computedStyle = getComputedStyle(currentElement);
+      const backgroundColor = computedStyle.backgroundColor;
+      
+      // Check if background color is not transparent
+      if (backgroundColor && 
+          backgroundColor !== 'rgba(0, 0, 0, 0)' && 
+          backgroundColor !== 'transparent') {
+        console.log('🖼️ [SCREENSHOT] Found background color:', backgroundColor, 'on element:', currentElement.tagName);
+        return backgroundColor;
+      }
+      
+      currentElement = currentElement.parentElement;
+    }
+    
+    // Check document.body and document.documentElement as fallbacks
+    const bodyStyle = getComputedStyle(document.body);
+    if (bodyStyle.backgroundColor && 
+        bodyStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' && 
+        bodyStyle.backgroundColor !== 'transparent') {
+      console.log('🖼️ [SCREENSHOT] Using body background color:', bodyStyle.backgroundColor);
+      return bodyStyle.backgroundColor;
+    }
+    
+    const htmlStyle = getComputedStyle(document.documentElement);
+    if (htmlStyle.backgroundColor && 
+        htmlStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' && 
+        htmlStyle.backgroundColor !== 'transparent') {
+      console.log('🖼️ [SCREENSHOT] Using html background color:', htmlStyle.backgroundColor);
+      return htmlStyle.backgroundColor;
+    }
+    
+    // Default to white background instead of transparent for better visibility
+    console.log('🖼️ [SCREENSHOT] No background color found, defaulting to white');
+    return '#ffffff';
   }
 }; 

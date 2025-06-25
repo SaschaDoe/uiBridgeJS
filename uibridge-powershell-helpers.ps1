@@ -62,13 +62,15 @@ function Take-UIBridgeScreenshot {
     param(
         [bool]$FullPage = $true,
         [string]$Format = "png",
-        [int]$Quality = 90
+        [int]$Quality = 90,
+        [string]$BackgroundColor = "auto"  # 'auto', 'transparent', or specific color
     )
     
     $options = @{
         fullPage = $FullPage
         format = $Format
         quality = $Quality
+        backgroundColor = $BackgroundColor
     }
     
     $body = @{

@@ -1,456 +1,325 @@
-# 🌉 UIBridge - AI-Powered Web Automation Framework
+# 🌉 UIBridge - AI-Powered Live Session Automation
 
-> **For AI Agents & Developers**: UIBridge enables programmatic control of web applications through simple commands. Perfect for AI-driven automation, testing, and interaction workflows.
+> **For AI Agents**: Control web applications in your LIVE browser - see automation happen in real-time with visual feedback!
 
 [![npm version](https://badge.fury.io/js/@sashbot/uibridge.svg)](https://www.npmjs.com/package/@sashbot/uibridge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🚀 NEW in v1.4.2: Live Session Automation + Visual Debug Panel
+## 🎯 What UIBridge Does
 
-UIBridge now includes a **real-time visual debug panel** that shows automation happening live in your web app, plus **simplified PowerShell helpers** for AI agents!
+UIBridge lets AI agents control web applications in your **actual browser** instead of hidden windows. You see every click, screenshot, and action happen live with a real-time debug panel.
 
-```javascript
-// ✅ RECOMMENDED: Enable visual debugging + remote control
-const uibridge = new UIBridge({ 
-  enableRemoteControl: true,
-  showDebugPanel: true,        // 🎯 NEW: See automation happen live!
-  debugPanelOptions: {
-    position: 'bottom-right',
-    showScreenshots: true
-  }
-});
-await uibridge.init();
-// 🌉 Debug panel appears showing real-time automation activity!
-```
+**Perfect for**: AI agents, automation testing, live debugging, visual feedback workflows.
 
-```powershell
-# ✅ AI-FRIENDLY PowerShell automation with live visual feedback
-. .\uibridge-powershell-helpers.ps1
+---
 
-# Commands appear instantly in the debug panel:
-Start-UIBridgeSession -Url "http://localhost:5173"    # Setup + navigate + screenshot
-Click-UIBridgeText -Text "Submit"                     # Click button by text  
-Take-UIBridgeScreenshot                               # Verify with screenshot
-```
+## 🚀 Super Simple Setup for AI Agents
 
-📖 **[Complete Migration Guide](./documentation/ssd.md)** | 🚀 **[PowerShell Helpers](./uibridge-powershell-helpers.ps1)**
-
-## ⚡ Quick Start
-
-### 1. Installation
+### Step 1: Install UIBridge
 ```bash
 npm install @sashbot/uibridge
 ```
 
-### 2. Setup Server (Essential for AI Automation)
-
-**🌟 RECOMMENDED for AI: Live Session Mode**
+### Step 2: Download & Start the Server
 ```bash
-# Download the live session server
+# Download the live session server (one-time)
 curl -o client-server.cjs https://unpkg.com/@sashbot/uibridge@latest/client-server.cjs
-node client-server.cjs  # Start live session server on port 3002
+
+# Start the server (keep this running)
+node client-server.cjs
+```
+**✅ Server Status**: You should see `UIBridge Client-Server running on http://localhost:3002`
+
+### Step 3: Connect Your Web App
+Add **ONE LINE** to your web app's HTML (anywhere in `<head>` or `<body>`):
+```html
+<script src="http://localhost:3002/uibridge-client.js"></script>
 ```
 
-**Alternative: Classic Hidden Browser Mode**
+### Step 4: Open Your Web App
+Navigate to your web app in any browser. You'll immediately see a **debug panel** in the top-right corner showing "Connected to UIBridge Server" ✅
+
+### Step 5: Download AI Helper Functions
 ```bash
-npx uibridge-setup  # Copies server files to your project
-node api-server.cjs  # Start hidden browser server on port 3002
+# Download PowerShell helpers for easy automation
+curl -o uibridge-live-session-helpers.ps1 https://unpkg.com/@sashbot/uibridge@latest/uibridge-live-session-helpers.ps1
 ```
 
-### 3. Enable in Your Web App - **WITH VISUAL DEBUG PANEL**
-```javascript
-// React/Svelte/Vue/Vanilla - works everywhere
-import UIBridge from '@sashbot/uibridge';
-
-const uibridge = new UIBridge({ 
-  enableRemoteControl: true,  // Auto-polling enabled
-  showDebugPanel: true,       // 🎯 RECOMMENDED: Visual automation feedback
-  debugPanelOptions: {
-    position: 'bottom-right',
-    showScreenshots: true,
-    autoConnect: true
-  },
-  debug: true
-});
-await uibridge.init();
-// 🌉 You'll see a floating debug panel showing live automation activity!
-```
-
-### 4. External Automation (PowerShell/AI) - **RECOMMENDED**
+### Step 6: Start Automating!
 ```powershell
-# ✅ Use the simplified PowerShell helpers (MUCH easier for AI agents)
-. .\uibridge-powershell-helpers.ps1
+# Load the helper functions
+. .\uibridge-live-session-helpers.ps1
 
-# Complete automation in 3 simple commands:
-Start-UIBridgeSession -Url "http://localhost:5173"
-Click-UIBridgeText -Text "Submit"
-Take-UIBridgeScreenshot
+# Test everything is working
+Start-UIBridgeLiveSession
+
+# Click something (you'll see it happen in your browser!)
+Click-UIBridgeLiveText -Text "Submit"
+
+# Take a screenshot (auto-saves with timestamp)
+Take-UIBridgeLiveScreenshot
 ```
 
-## 🎯 Core Commands for AI Agents
+**🎉 That's it!** You now have live browser automation with visual feedback.
 
-### Click Automation
-```javascript
-// Multiple selector strategies - try in order of reliability:
-await uibridge.execute('click', { testId: 'submit-btn' });    // Highest reliability
-await uibridge.execute('click', '#submit-button');           // High reliability  
-await uibridge.execute('click', { text: 'Submit' });         // Medium reliability
-await uibridge.execute('click', { ariaLabel: 'Submit form' }); // Medium reliability
+---
+
+## 🤖 Essential AI Agent Commands
+
+### 🔗 Connection & Setup
+```powershell
+# Load helpers (do this first in every session)
+. .\uibridge-live-session-helpers.ps1
+
+# Check if everything is connected properly
+Test-UIBridgeClientServer          # ✅ Checks server is running
+Get-UIBridgeClients               # ✅ Shows connected browsers
+Start-UIBridgeLiveSession         # ✅ Complete connection test + guide
 ```
 
-### Screenshot Capture
-```javascript
-// Full page screenshot for verification
-await uibridge.execute('screenshot', { fullPage: true });
+### 🖱️ Clicking Elements (You'll See It Happen Live!)
+```powershell
+# Click by button text (RECOMMENDED - most reliable)
+Click-UIBridgeLiveText -Text "Submit"
+Click-UIBridgeLiveText -Text "Save"
+Click-UIBridgeLiveText -Text "Login"
 
-// Element-specific screenshot with auto-save
-await uibridge.execute('screenshot', { 
-  selector: '#main-content',
-  saveConfig: { autoSave: true, folder: 'ai-screenshots' }
-});
+# Click by CSS selector (when text doesn't work)
+Click-UIBridgeLiveElement -Selector "#save-button"
+Click-UIBridgeLiveElement -Selector ".submit-btn"
+
+# Click by test ID (best for testing)
+Click-UIBridgeLiveTestId -TestId "submit-btn"
 ```
 
-### Command Discovery
-```javascript
-// Get all available commands for AI agents
-const commands = uibridge.discover();
-const help = await uibridge.execute('help');
-console.log(help.automationPatterns); // AI-specific patterns
+### 📸 Screenshots (Auto-Saved with Timestamps)
+```powershell
+# Take screenshot of entire page (automatically detects background color)
+Take-UIBridgeLiveScreenshot
+
+# Take screenshot with specific background color (fixes transparency issues)
+Take-UIBridgeLiveScreenshot -BackgroundColor "#ffffff"   # White background
+Take-UIBridgeLiveScreenshot -BackgroundColor "yellow"    # Yellow background
+Take-UIBridgeLiveScreenshot -BackgroundColor "transparent" # Transparent background
+
+# Screenshot gets auto-saved as: screenshots/screenshot_2024-01-15_14-30-25.png
 ```
 
-## 🧠 AI Automation Patterns
+### 📊 Monitoring & Debugging
+```powershell
+# See what commands were executed recently
+Get-UIBridgeLiveActivity
 
-### Pattern 1: Robust Element Interaction
-```javascript
-async function clickWithFallbacks(identifier) {
-  const strategies = [
-    { testId: identifier },
-    `#${identifier}`,
-    { text: identifier },
-    { ariaLabel: identifier }
-  ];
-  
-  for (const strategy of strategies) {
-    try {
-      await uibridge.execute('click', strategy);
-      await uibridge.execute('screenshot', { fullPage: true }); // Verify
-      return;
-    } catch (error) {
-      console.log(`Strategy failed: ${JSON.stringify(strategy)}`);
-    }
-  }
-  throw new Error(`Could not find element: ${identifier}`);
-}
+# Show all available commands
+Show-UIBridgeLiveHelp
+
+# Check connection status
+Get-UIBridgeClients
 ```
 
-### Pattern 2: Form Workflow
-```javascript
-async function submitFormWorkflow() {
-  // Before screenshot
-  await uibridge.execute('screenshot', { 
-    saveConfig: { prefix: 'before-submit' }
-  });
-  
-  // Submit action
-  await uibridge.execute('click', { text: 'Submit' });
-  
-  // Verification screenshot
-  await uibridge.execute('screenshot', { 
-    saveConfig: { prefix: 'after-submit' }
-  });
-}
+---
+
+## 🎯 Complete AI Automation Example
+
+```powershell
+# 1. Load helpers (always first)
+. .\uibridge-live-session-helpers.ps1
+
+# 2. Verify connection
+Start-UIBridgeLiveSession
+
+# 3. Take "before" screenshot
+Take-UIBridgeLiveScreenshot
+
+# 4. Click something (you see it happen live!)
+Click-UIBridgeLiveText -Text "Make Background Yellow"
+
+# 5. Take "after" screenshot to verify
+Take-UIBridgeLiveScreenshot
+
+# 6. Review what happened
+Get-UIBridgeLiveActivity
 ```
 
-## 🔧 Configuration Options
+**🎮 What You See**: Every command appears instantly in the debug panel in your browser, and you watch the clicks happen in real-time!
 
-```javascript
-const uibridge = new UIBridge({
-  // Remote control (NEW in v1.3.0)
-  enableRemoteControl: true,        // Enable auto-polling
-  serverUrl: 'http://localhost:3002', // Server endpoint
-  pollInterval: 500,                // Polling frequency (ms)
-  
-  // General settings
-  debug: true,
-  defaultScreenshotConfig: {
-    autoSave: true,
-    folder: 'automation-screenshots',
-    timestamp: true,
-    includeMetadata: true
-  }
-});
-```
+---
 
-## 🌐 Framework Compatibility
+## 🎨 Visual Debug Panel Features
 
-### SvelteKit/SSR Safe
-```javascript
-import { onMount } from 'svelte';
-import { browser } from '$app/environment';
+When connected, you'll see a floating panel showing:
+- 📊 **Live Command Feed**: Every click/screenshot as it happens
+- 📸 **Screenshot Previews**: Thumbnail views of captured images  
+- ✅ **Success/Error Status**: Instant feedback on each command
+- 🔗 **Connection Indicator**: Green = connected, Red = disconnected
+- 📈 **Command Statistics**: Success rates and timing
 
-onMount(async () => {
-  if (!browser) return; // SSR safety
-  
-  const { default: UIBridge } = await import('@sashbot/uibridge');
-  const uibridge = new UIBridge({ 
-    enableRemoteControl: true,
-    showDebugPanel: true,        // Visual automation feedback
-    debugPanelOptions: {
-      position: 'bottom-right',
-      showScreenshots: true
-    },
-    debug: true 
-  });
-  await uibridge.init();
-});
-```
+---
 
-### React Integration
+## 🔧 Framework Integration
+
+### React
 ```javascript
 import { useEffect } from 'react';
-import UIBridge from '@sashbot/uibridge';
 
 function App() {
   useEffect(() => {
-    const initUIBridge = async () => {
-      const uibridge = new UIBridge({ 
-        enableRemoteControl: true,
-        showDebugPanel: true,        // Real-time automation visualization
-        debugPanelOptions: {
-          position: 'bottom-right',
-          showScreenshots: true
-        }
-      });
-      await uibridge.init();
-    };
-    initUIBridge();
+    // UIBridge auto-connects via the script tag
+    // No additional setup needed!
   }, []);
   
   return <div>Your App</div>;
 }
 ```
 
-### Vue.js Integration
+### Vue.js
 ```javascript
-import { onMounted } from 'vue';
-import UIBridge from '@sashbot/uibridge';
-
 export default {
-  setup() {
-    onMounted(async () => {
-      const uibridge = new UIBridge({ 
-        enableRemoteControl: true,
-        showDebugPanel: true,        // Live automation monitoring
-        debugPanelOptions: {
-          position: 'bottom-right',
-          showScreenshots: true
-        }
-      });
-      await uibridge.init();
-    });
+  mounted() {
+    // UIBridge auto-connects via the script tag
+    // No additional setup needed!
   }
 };
 ```
 
-## 🚀 PowerShell Automation for AI - **SIMPLIFIED**
-
-### ⚡ Quick Setup (One-Time)
-```powershell
-# Download the helper functions to your project
-# Copy uibridge-powershell-helpers.ps1 to your project folder
-```
-
-### 🎯 AI-Friendly Functions
-```powershell
-# Load helpers (do this once per session)
-. .\uibridge-powershell-helpers.ps1
-
-# Essential commands for AI agents:
-Test-UIBridgeServer                          # Check if server is running
-Open-UIBridgePage -Url "https://example.com" # Navigate to page
-Take-UIBridgeScreenshot                      # Screenshot (auto-saves)
-Click-UIBridgeText -Text "Submit"            # Click by button text
-Click-UIBridgeElement -Selector "#btn"       # Click by CSS selector
-Get-UIBridgePageInfo                         # Get page title/URL
-Start-UIBridgeSession -Url "URL"             # Complete setup in one command
-```
-
-### 🤖 AI Automation Pattern
-```powershell
-# Complete automation workflow - simple & reliable
-. .\uibridge-powershell-helpers.ps1
-
-# Start session (checks server + navigates + initial screenshot)
-$session = Start-UIBridgeSession -Url "http://localhost:5173"
-
-# Interact with the page
-Click-UIBridgeText -Text "Make Background Yellow"
-
-# Verify the change
-Take-UIBridgeScreenshot
-
-# Done! 🎉
-```
-
-### 🔍 Why This Is Better for AI Agents
-- **No JSON construction** - functions handle it internally
-- **Built-in error handling** - clear success/failure messages
-- **Automatic screenshots** - saved with timestamps
-- **Simple function names** - easy for AI to remember
-- **Rich console feedback** - colored output for debugging
-
-## 🌉 Visual Debug Panel - **GAME CHANGER**
-
-The debug panel shows **real-time automation activity** in your web app:
-
-### 🎯 What You See
-- **Live Command Feed**: Every click, screenshot, and command as it happens
-- **Screenshot Previews**: See what automation captures
-- **Success/Error Status**: Instant feedback on command results  
-- **Server Connection**: Visual indicator of API server health
-- **Drag & Drop**: Position anywhere on screen
-- **Minimize/Expand**: Stay focused when needed
-
-### 📱 Enable Debug Panel
+### SvelteKit
 ```javascript
-const uibridge = new UIBridge({
-  enableRemoteControl: true,
-  showDebugPanel: true,          // 🔥 Enable the magic
-  debugPanelOptions: {
-    position: 'bottom-right',    // top-left, top-right, bottom-left, bottom-right
-    minimized: false,            // Start expanded
-    showScreenshots: true,       // Show screenshot previews  
-    autoConnect: true           // Auto-connect to server
+import { onMount } from 'svelte';
+import { browser } from '$app/environment';
+
+onMount(() => {
+  if (browser) {
+    // UIBridge auto-connects via the script tag
+    // No additional setup needed!
   }
 });
 ```
 
-### 🎮 Panel Controls
-```javascript
-// Show/hide programmatically
-uibridge.showDebugPanel();
-uibridge.hideDebugPanel(); 
-uibridge.toggleDebugPanel();
-uibridge.destroyDebugPanel();
+### Vanilla HTML
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My App</title>
+  <script src="http://localhost:3002/uibridge-client.js"></script>
+</head>
+<body>
+  <h1>My Application</h1>
+  <button id="test-btn">Click Me</button>
+</body>
+</html>
 ```
-
-**💡 Pro Tip**: The debug panel bridges the gap between your web app and external automation - you finally **see what's happening** instead of guessing!
-
-## 🔍 Available Commands
-
-| Command | Purpose | Example |
-|---------|---------|---------|
-| `click` | Interact with elements | `execute('click', '#button')` |
-| `screenshot` | Capture page/element | `execute('screenshot', {fullPage: true})` |
-| `help` | Get documentation | `execute('help', 'click')` |
-
-### Selector Priority (Most Reliable First)
-1. **Test ID**: `{ testId: 'element-id' }` - Best for automation
-2. **CSS ID**: `'#element-id'` - High reliability
-3. **Text Content**: `{ text: 'Button Text' }` - Natural language
-4. **Aria Label**: `{ ariaLabel: 'Label' }` - Accessibility-friendly
-5. **CSS Class**: `'.class-name'` - Use sparingly
-
-## 🛠️ Error Handling
-
-```javascript
-async function robustExecution(command, ...args) {
-  try {
-    const result = await uibridge.execute(command, ...args);
-    console.log(`✅ ${command} succeeded:`, result);
-    return result;
-  } catch (error) {
-    console.error(`❌ ${command} failed:`, error.message);
-    
-    // Get help for the command
-    const help = await uibridge.execute('help', command);
-    console.log('Available options:', help.examples);
-    
-    throw error;
-  }
-}
-```
-
-## 🧪 Testing & Verification
-
-### Check Remote Control Status
-```javascript
-const status = uibridge.getRemoteControlStatus();
-console.log(status);
-// {
-//   enabled: true,
-//   polling: true,
-//   serverUrl: 'http://localhost:3002',
-//   pollInterval: 500
-// }
-```
-
-### Test External Commands
-```bash
-# Health check
-curl http://localhost:3002/health
-
-# Test click command
-curl -X POST http://localhost:3002/execute \
-  -H "Content-Type: application/json" \
-  -d '{"command": "click", "selector": "#test-button"}'
-
-# Test screenshot
-curl -X POST http://localhost:3002/execute \
-  -H "Content-Type: application/json" \
-  -d '{"command": "screenshot", "options": {"fullPage": true}}'
-```
-
-## 🤖 AI Agent Quick Rules
-
-**For Cursor/AI Tools - Use these simple patterns:**
-
-```powershell
-# 1. Always load helpers first
-. .\uibridge-powershell-helpers.ps1
-
-# 2. Start with session setup
-Start-UIBridgeSession -Url "YOUR_URL"
-
-# 3. Click elements by text (most reliable)
-Click-UIBridgeText -Text "Button Text"
-
-# 4. Take screenshots for verification
-Take-UIBridgeScreenshot
-
-# 5. Check server health if things fail
-Test-UIBridgeServer
-```
-
-**🎯 AI Success Pattern:**
-1. **Load helpers** → 2. **Start session** → 3. **Click/interact** → 4. **Take screenshot** → 5. **Done!**
-
-**⚠️ AI Common Mistakes to Avoid:**
-- Don't construct JSON manually - use the helper functions
-- Don't forget to load the helpers with `. .\uibridge-powershell-helpers.ps1`
-- Don't skip screenshots - they verify your actions worked
-- Don't use complex selectors - prefer text-based clicking
-
-## 📚 Documentation & Support
-
-- **📖 Setup Guide**: [Simplified Setup Documentation](./documentation/ssd.md)
-- **🤖 AI Guide**: [CURSOR_AI_USAGE_RULES.md](./CURSOR_AI_USAGE_RULES.md)
-- **⚡ PowerShell Helpers**: `uibridge-powershell-helpers.ps1` (copy to your project)
-- **🛠️ API Reference**: Use `execute('help')` for built-in documentation
-- **🐛 Issues**: [GitHub Issues](https://github.com/sashbot/uibridge-js/issues)
-- **📦 NPM**: [@sashbot/uibridge](https://www.npmjs.com/package/@sashbot/uibridge)
-
-## 🎯 Key Benefits
-
-- **🌉 Visual Debugging**: Real-time debug panel shows automation happening live
-- **🤖 AI-Optimized**: PowerShell helpers make automation 10x easier for AI agents
-- **⚡ Simple Commands**: `Click-UIBridgeText -Text "Submit"` instead of complex REST calls
-- **📱 Universal**: Works with any JavaScript framework
-- **🛡️ Reliable**: Built-in error handling and retry logic
-- **📸 Live Screenshots**: See automation screenshots instantly in the debug panel
-- **🔗 Bridge Gap**: Connect external automation to your actual web app visually
-- **🔒 Secure**: Standard HTTP communication, no special permissions needed
 
 ---
 
-**🌉 Built for Visual AI Automation**: UIBridge v1.4.2+ combines powerful automation with real-time visual debugging and live session control - see your automation happen live in your existing browser instead of wondering what's going on behind the scenes! 
+## 🛠️ HTTP API (Alternative to PowerShell)
+
+If you can't use PowerShell, you can use HTTP directly:
+
+```bash
+# Check server health
+curl http://localhost:3002/health
+
+# Click by text (you'll see it in your browser!)
+curl -X POST http://localhost:3002/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"click","selector":{"text":"Submit"}}'
+
+# Take screenshot
+curl -X POST http://localhost:3002/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"screenshot"}'
+
+# List connected clients
+curl http://localhost:3002/clients
+```
+
+---
+
+## 🚨 Troubleshooting for AI Agents
+
+### Problem: Can't connect to server
+```powershell
+Test-UIBridgeClientServer
+# If this fails, restart the server:
+# node client-server.cjs
+```
+
+### Problem: No debug panel appears
+1. Check the browser console for errors
+2. Verify the script tag: `<script src="http://localhost:3002/uibridge-client.js"></script>`
+3. Make sure the server is running on port 3002
+
+### Problem: Clicks don't work
+```powershell
+# Try different click strategies in order:
+Click-UIBridgeLiveText -Text "Button Text"        # Try this first
+Click-UIBridgeLiveTestId -TestId "button-id"      # If text doesn't work
+Click-UIBridgeLiveElement -Selector "#button-id"  # If test ID doesn't work
+```
+
+### Problem: Can't find element
+```powershell
+# Take a screenshot first to see what's on the page
+Take-UIBridgeLiveScreenshot
+
+# Check recent activity for error details
+Get-UIBridgeLiveActivity
+```
+
+### Problem: Screenshots show transparent instead of colored backgrounds
+```powershell
+# Solution 1: Use auto-detection (default - should work in most cases)
+Take-UIBridgeLiveScreenshot -BackgroundColor "auto"
+
+# Solution 2: Specify the expected background color explicitly
+Take-UIBridgeLiveScreenshot -BackgroundColor "yellow"      # For yellow backgrounds
+Take-UIBridgeLiveScreenshot -BackgroundColor "#ffff00"     # Hex color
+Take-UIBridgeLiveScreenshot -BackgroundColor "rgb(255,255,0)" # RGB color
+
+# Solution 3: Force white background for visibility
+Take-UIBridgeLiveScreenshot -BackgroundColor "#ffffff"
+```
+
+---
+
+## 🎯 AI Agent Best Practices
+
+### ✅ DO:
+- Always load helpers first: `. .\uibridge-live-session-helpers.ps1`
+- Use `Click-UIBridgeLiveText` first (most reliable)
+- Take screenshots to verify actions worked
+- Use `Start-UIBridgeLiveSession` to test connection
+- Check `Get-UIBridgeLiveActivity` when things fail
+
+### ❌ DON'T:
+- Don't construct JSON manually - use the helper functions
+- Don't skip the script tag in your HTML
+- Don't forget to start the server first
+- Don't use complex CSS selectors if text clicking works
+
+---
+
+## 🎉 Why This Is Perfect for AI Agents
+
+1. **👀 Visual Feedback**: See every action happen in real-time
+2. **🎯 Simple Commands**: `Click-UIBridgeLiveText -Text "Submit"` instead of complex APIs
+3. **📸 Auto-Screenshots**: Every screenshot auto-saves with timestamps
+4. **🔍 Easy Debugging**: Debug panel shows exactly what happened
+5. **🤖 AI-Friendly**: PowerShell functions designed specifically for AI agents
+6. **⚡ Fast Setup**: One script tag, one server command, start automating
+7. **🌐 Universal**: Works with any web framework
+8. **🛡️ Reliable**: Built-in error handling and retry logic
+
+---
+
+## 📚 Additional Resources
+
+- **🔧 [Complete Setup Guide](./documentation/simple-example.md)**
+- **🤖 [AI Agent Rules](./CURSOR_AI_USAGE_RULES.md)**
+- **📦 [NPM Package](https://www.npmjs.com/package/@sashbot/uibridge)**
+- **🐛 [GitHub Issues](https://github.com/sashbot/uibridge-js/issues)**
+
+---
+
+**🌉 Built for AI Agents**: UIBridge bridges the gap between AI automation and visual feedback - finally see what your automation is doing in real-time! 

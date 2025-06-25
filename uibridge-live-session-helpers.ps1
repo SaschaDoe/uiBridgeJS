@@ -88,6 +88,9 @@ function Take-UIBridgeLiveScreenshot {
         [switch]$FullPage,
         
         [Parameter()]
+        [string]$BackgroundColor = 'auto',  # 'auto', 'transparent', or specific color like '#ffffff'
+        
+        [Parameter()]
         [string]$ClientId = $null
     )
     
@@ -100,6 +103,7 @@ function Take-UIBridgeLiveScreenshot {
                 format = $Format
                 quality = $Quality
                 fullPage = $FullPage.IsPresent
+                backgroundColor = $BackgroundColor
             }
         }
         
