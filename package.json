@@ -1,7 +1,7 @@
 {
   "name": "@sashbot/uibridge",
-  "version": "1.4.3",
-  "description": "🤖 AI-friendly live session automation - control your EXISTING browser with visual debug panel. No hidden windows!",
+  "version": "1.5.0",
+  "description": "🤖 AI-friendly live session automation with REAL screenshot backgrounds (no transparency issues!) - control your EXISTING browser with visual debug panel. Perfect for AI agents!",
   "type": "module",
   "main": "dist/uibridge.cjs.js",
   "module": "dist/uibridge.esm.js",
@@ -22,7 +22,6 @@
     "dist/**/*",
     "src/**/*",
     "README.md",
-    "README-live-session.md",
     "LICENSE",
     "CHANGELOG.md",
     "CURSOR_AI_USAGE_RULES.md",

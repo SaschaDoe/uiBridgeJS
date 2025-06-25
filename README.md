@@ -94,13 +94,13 @@ Click-UIBridgeLiveTestId -TestId "submit-btn"
 
 ### 📸 Screenshots (Auto-Saved with Timestamps)
 ```powershell
-# Take screenshot of entire page (automatically detects background color)
+# Take screenshot showing the ACTUAL page background (default - recommended)
 Take-UIBridgeLiveScreenshot
 
-# Take screenshot with specific background color (fixes transparency issues)
-Take-UIBridgeLiveScreenshot -BackgroundColor "#ffffff"   # White background
-Take-UIBridgeLiveScreenshot -BackgroundColor "yellow"    # Yellow background
-Take-UIBridgeLiveScreenshot -BackgroundColor "transparent" # Transparent background
+# If the auto-detection doesn't work, try these options:
+Take-UIBridgeLiveScreenshot -BackgroundColor "auto"        # Auto-detect actual page background
+Take-UIBridgeLiveScreenshot -BackgroundColor "transparent" # Force transparent (old behavior)
+Take-UIBridgeLiveScreenshot -BackgroundColor "#ffffff"     # Force white (only if page is broken)
 
 # Screenshot gets auto-saved as: screenshots/screenshot_2024-01-15_14-30-25.png
 ```
@@ -267,18 +267,19 @@ Take-UIBridgeLiveScreenshot
 Get-UIBridgeLiveActivity
 ```
 
-### Problem: Screenshots show transparent instead of colored backgrounds
+### Problem: Screenshots show transparent instead of actual page backgrounds
 ```powershell
-# Solution 1: Use auto-detection (default - should work in most cases)
+# Solution 1: Use default auto-detection (should capture your actual page background)
+Take-UIBridgeLiveScreenshot
+
+# Solution 2: Explicitly request auto-detection if default doesn't work
 Take-UIBridgeLiveScreenshot -BackgroundColor "auto"
 
-# Solution 2: Specify the expected background color explicitly
-Take-UIBridgeLiveScreenshot -BackgroundColor "yellow"      # For yellow backgrounds
-Take-UIBridgeLiveScreenshot -BackgroundColor "#ffff00"     # Hex color
-Take-UIBridgeLiveScreenshot -BackgroundColor "rgb(255,255,0)" # RGB color
+# Solution 3: Only use specific colors if your page background is broken/not detected
+Take-UIBridgeLiveScreenshot -BackgroundColor "#ffffff"     # Force white as fallback
+Take-UIBridgeLiveScreenshot -BackgroundColor "transparent" # Keep old transparent behavior
 
-# Solution 3: Force white background for visibility
-Take-UIBridgeLiveScreenshot -BackgroundColor "#ffffff"
+# The goal is to see YOUR page's actual background, not override it!
 ```
 
 ---

@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2024-12-30
+
+### 🎯 MAJOR: Fixed Screenshot Transparency Issue
+- **SOLVED**: Screenshots now capture REAL background colors instead of showing transparent
+- **Auto-detection**: New `backgroundColor: 'auto'` default automatically detects computed background colors
+- **Smart fallback**: Walks up DOM tree to find the first non-transparent background color
+- **Manual override**: PowerShell commands now support `-BackgroundColor` parameter for specific colors
+- **Default safety**: Falls back to white background instead of transparent for better visibility
+
+### 📚 Documentation Consolidated & Simplified
+- **MERGED**: Combined README.md and README-live-session.md into single crystal-clear guide
+- **AI-OPTIMIZED**: Super clear 6-step setup specifically designed for AI agents
+- **FOCUSED**: Live session automation is now THE primary approach (not an alternative)
+- **TROUBLESHOOTING**: Added comprehensive troubleshooting section including background color fixes
+
+### 🤖 Enhanced AI Agent Support
+- **PowerShell improvements**: Both helper files now support `-BackgroundColor` parameter
+- **Clear examples**: Documentation shows exactly how to fix background color issues
+- **Simple workflow**: Get server → Connect → Click → Screenshot with proper backgrounds
+- **Visual feedback**: Emphasis on real-time visual debugging throughout
+
+### 🔧 Technical Improvements
+- **_detectBackgroundColor()**: New method that intelligently finds actual background colors
+- **Better defaults**: `backgroundColor: 'auto'` instead of `null` for real color capture
+- **DOM traversal**: Smart parent element checking for background color inheritance
+- **Error handling**: Clear logging and fallback behavior for better debugging
+
+### Breaking Changes
+- **Default behavior**: Screenshots now default to auto-detected backgrounds instead of transparent
+- **File removal**: Deleted redundant README-live-session.md (content merged into main README)
+
+### Migration
+- **Automatic**: Existing code gets better screenshots automatically
+- **Compatibility**: All existing PowerShell commands continue to work
+- **Enhancement**: Add `-BackgroundColor` parameter for explicit color control
+
 ## [1.4.3] - 2024-12-20
 
 ### 🌟 NEW: Live Session Automation for AI Agents
@@ -77,106 +113,4 @@ The old `server-example.cjs` was a queue-only server that required web apps to p
 - ✅ `setup-server.js` - Easy server setup helper
 - ✅ `test-screenshot-fix.html` - Current working test page
 - ✅ `test-help-browser.html` - Help system test
-- ✅ `example-powershell-automation.ps1` - Current PowerShell example
-
-### Why Only One Server Now?
-- **Before**: `server-example.cjs` queued commands → web app polled → executed
-- **Now**: `api-server.cjs` executes commands directly → immediate results
-- **Simpler**: External tools just send commands to port 3002 and get results
-- **No confusion**: One server, one port, one way to do automation
-
-## [1.3.0] - 2024-12-28
-
-### 🚀 Major Feature: Built-in Remote Control
-**BREAKING CHANGE**: This eliminates the need for manual polling implementation!
-
-### Added
-- **Auto-polling functionality**: UIBridge now handles command polling internally
-- **Remote control configuration**: `enableRemoteControl`, `serverUrl`, `pollInterval` options
-- **Automatic server connection**: No more manual `pollForCommands()` implementation needed
-- **Built-in command execution**: Server commands are automatically executed and results sent back
-- **Simplified API**: Just set `enableRemoteControl: true` and UIBridge handles everything
-
-### Changed
-- **Drastically simplified usage**: Web apps no longer need to implement polling logic
-- **Better developer experience**: Reduced from ~50 lines of polling code to 1 config option
-- **Automatic initialization**: Remote control starts automatically when enabled
-
-### Fixed
-- **Complexity issue**: Eliminated the need for users to manually implement server communication
-- **User experience**: What was previously complex setup is now automatic
-
-### Migration Guide
-**Before (complex):**
-```javascript
-// Old way - required manual polling implementation
-uibridge = new UIBridge();
-await uibridge.init();
-pollForCommands(); // Manual polling function needed
-async function pollForCommands() { /* 30+ lines of code */ }
-```
-
-**After (simple):**
-```javascript
-// New way - just enable remote control
-uibridge = new UIBridge({ 
-  enableRemoteControl: true  // That's it!
-});
-await uibridge.init();
-// Remote control now works automatically
-```
-
-## [1.2.6] - 2024-12-28
-
-### Added
-- **Server Setup Helper**: New `setup-server.js` script to copy server files to user projects
-- **Binary Command**: Added `npx uibridge-setup` command for easy server setup
-- **npm Script**: Added `npm run setup-server` for package users
-- **Enhanced Documentation**: Updated README with prominent server setup instructions
-
-### Changed
-- Made server files much easier to discover and set up after installation
-- Updated README with clear step-by-step server setup instructions
-- Improved PowerShell examples to use the correct port (3002) for api-server
-
-### Fixed
-- **Discoverability Issue**: Server files now have clear setup process instead of being "hidden" in node_modules
-- AI agents and users can now easily find and copy the required server files
-
-## [1.2.5] - 2024-12-28
-
-### Fixed
-- **Screenshot functionality**: Fixed "Failed to load html2canvas library" error
-  - Improved html2canvas loading with multiple CDN fallbacks for reliability
-  - Removed problematic integrity hash that was causing loading failures
-  - Added timeout protection (30 seconds) for screenshot capture operations
-  - Enhanced error handling with more descriptive error messages
-  - Fixed server integration to properly use UIBridge screenshots instead of bypassing with Playwright
-
-### Added
-- Multiple CDN sources for html2canvas loading (cdnjs, unpkg, jsdelivr)
-- Better initialization checks and validation for html2canvas
-- Comprehensive test files:
-  - `test-screenshot-fix.html` - Interactive browser test page
-  - `test-screenshot-fix.ps1` - PowerShell automation test script
-- Enhanced logging and debugging information for screenshot operations
-
-### Changed
-- Improved screenshot command reliability and error reporting
-- Better server-side handling of UIBridge screenshot operations
-- Enhanced timeout management for screenshot capture
-
-### Technical Details
-- Fixed `_ensureHtml2Canvas` method with robust CDN fallback mechanism
-- Added Promise.race timeout wrapper for screenshot operations
-- Updated api-server.cjs to properly initialize and use UIBridge
-- Improved error propagation and debugging capabilities
-
-## [1.2.4] - Previous Release
-
-### Features
-- Core UIBridge functionality
-- Click automation
-- Screenshot capabilities
-- Server integration
-- PowerShell automation support 
+- ✅ `
