@@ -360,50 +360,94 @@ export const screenshotCommand = {
   },
 
   /**
-   * Ensure html2canvas library is loaded
+   * Ensure html2canvas library is loaded with improved error handling
    * @private
    */
   async _ensureHtml2Canvas() {
     if (window.html2canvas) return;
     
     return new Promise((resolve, reject) => {
-      // Multiple CDN sources for reliability
+      // Multiple CDN sources for reliability (including newer versions)
       const cdnSources = [
-        'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
         'https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js',
-        'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'
+        'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+        // Fallback to latest version
+        'https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js'
       ];
       
       let currentIndex = 0;
       
       const tryLoadScript = () => {
         if (currentIndex >= cdnSources.length) {
-          reject(new Error('Failed to load html2canvas from all CDN sources'));
+          reject(new Error('Failed to load html2canvas from all CDN sources. Please check your internet connection or consider using a different screenshot method.'));
           return;
         }
         
         const script = document.createElement('script');
         script.src = cdnSources[currentIndex];
         script.crossOrigin = 'anonymous';
+        script.async = true;
+        
+        // Add integrity checking for some CDNs
+        if (script.src.includes('cdnjs.cloudflare.com')) {
+          script.integrity = 'sha512-UHwkWYKZYKtkT6k7iF4FITLJAVkI/J1iOtLwSbwUXf/R+0P+WFbHFvdPRyZOmJIa3V1p8Yj8FxkgnyFb1m4qw==';
+        }
         
         script.onload = () => {
-          // Add a small delay to ensure the library is fully initialized
+          // Add a delay and validate the library is properly loaded
           setTimeout(() => {
             if (window.html2canvas && typeof window.html2canvas === 'function') {
-              console.log('🖼️ [SCREENSHOT] html2canvas loaded successfully from:', cdnSources[currentIndex]);
-              resolve();
+              // Test that the library actually works
+              try {
+                const testDiv = document.createElement('div');
+                testDiv.style.position = 'absolute';
+                testDiv.style.left = '-9999px';
+                testDiv.style.width = '1px';
+                testDiv.style.height = '1px';
+                document.body.appendChild(testDiv);
+                
+                // Quick functionality test
+                window.html2canvas(testDiv, { width: 1, height: 1 }).then(() => {
+                  document.body.removeChild(testDiv);
+                  console.log('🖼️ [SCREENSHOT] html2canvas loaded and validated successfully from:', cdnSources[currentIndex]);
+                  resolve();
+                }).catch(() => {
+                  document.body.removeChild(testDiv);
+                  console.warn('🖼️ [SCREENSHOT] html2canvas loaded but failed validation test, trying next source...');
+                  currentIndex++;
+                  tryLoadScript();
+                });
+              } catch (testError) {
+                console.warn('🖼️ [SCREENSHOT] html2canvas loaded but failed basic test, trying next source...');
+                currentIndex++;
+                tryLoadScript();
+              }
             } else {
               console.warn('🖼️ [SCREENSHOT] html2canvas loaded but not functional, trying next source...');
               currentIndex++;
               tryLoadScript();
             }
-          }, 100);
+          }, 200); // Increased delay for better stability
         };
         
         script.onerror = () => {
           console.warn('🖼️ [SCREENSHOT] Failed to load html2canvas from:', cdnSources[currentIndex]);
           currentIndex++;
           tryLoadScript();
+        };
+        
+        // Add timeout for script loading
+        const originalOnload = script.onload;
+        const timeout = setTimeout(() => {
+          console.warn('🖼️ [SCREENSHOT] Timeout loading html2canvas from:', cdnSources[currentIndex]);
+          currentIndex++;
+          tryLoadScript();
+        }, 10000); // 10 second timeout
+        
+        script.onload = () => {
+          clearTimeout(timeout);
+          originalOnload(); // Call the original onload
         };
         
         // Check if script with same src is already being loaded
