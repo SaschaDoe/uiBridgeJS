@@ -25,6 +25,10 @@ fs.ensureDirSync(SCREENSHOTS_DIR);
 let browser = null;
 let page = null;
 
+// Activity tracking for debug panel
+let recentActivity = [];
+const MAX_ACTIVITY_ENTRIES = 100;
+
 /**
  * Initialize browser and page
  */
@@ -52,10 +56,48 @@ async function initBrowser() {
 }
 
 /**
+ * Helper function to track command activity
+ */
+function trackActivity(command, success, details = {}) {
+  const activity = {
+    id: Date.now() + Math.random(),
+    command,
+    success,
+    timestamp: new Date().toISOString(),
+    ...details
+  };
+  
+  recentActivity.unshift(activity);
+  
+  // Keep only recent entries
+  if (recentActivity.length > MAX_ACTIVITY_ENTRIES) {
+    recentActivity = recentActivity.slice(0, MAX_ACTIVITY_ENTRIES);
+  }
+  
+  return activity;
+}
+
+/**
  * Health check endpoint
  */
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+/**
+ * Get recent activity for debug panel
+ * GET /activity
+ */
+app.get('/activity', (req, res) => {
+  const limit = parseInt(req.query.limit) || 50;
+  const commands = recentActivity.slice(0, limit);
+  
+  res.json({ 
+    success: true, 
+    commands,
+    total: recentActivity.length,
+    timestamp: new Date().toISOString()
+  });
 });
 
 /**
@@ -143,6 +185,9 @@ app.post('/execute', async (req, res) => {
           timestamp: new Date().toISOString()
         };
         
+        // Track activity
+        trackActivity('click', true, { selector });
+        
       } catch (clickError) {
         result = {
           success: false,
@@ -151,6 +196,9 @@ app.post('/execute', async (req, res) => {
           error: clickError.message,
           timestamp: new Date().toISOString()
         };
+        
+        // Track activity
+        trackActivity('click', false, { selector, error: clickError.message });
       }
       
     } else if (command === 'screenshot') {
@@ -188,6 +236,16 @@ app.post('/execute', async (req, res) => {
           result.serverFilepath = filepath;
           
           console.log(`📸 Screenshot saved: ${filename} (${result.size} bytes)`);
+          
+          // Track activity with screenshot data
+          trackActivity('screenshot', true, { 
+            filename, 
+            size: result.size,
+            screenshot: result.dataUrl // Include for debug panel
+          });
+        } else if (result.success) {
+          // Track successful screenshot without data
+          trackActivity('screenshot', true, { size: result.size });
         }
         
       } catch (screenshotError) {
@@ -197,6 +255,9 @@ app.post('/execute', async (req, res) => {
           error: screenshotError.message,
           timestamp: new Date().toISOString()
         };
+        
+        // Track activity
+        trackActivity('screenshot', false, { error: screenshotError.message });
       }
       
     } else {

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIBridge Debug Panel Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        button.danger {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+        
+        button.danger:hover {
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+        }
+        
+        button.info {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+        }
+        
+        button.info:hover {
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+        
+        .info-box {
+            background: rgba(33, 150, 243, 0.2);
+            border: 1px solid rgba(33, 150, 243, 0.5);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        
+        .warning-box {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        
+        .success-box {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        
+        .buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .debug-controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌉 UIBridge Debug Panel Demo</h1>
+        
+        <div class="info-box">
+            <h3>🎯 What is this?</h3>
+            <p>This page demonstrates the <strong>UIBridge Visual Debug Panel</strong> - a real-time debugging tool that shows automation commands as they happen in your web app.</p>
+        </div>
+        
+        <div class="warning-box">
+            <h3>⚠️ Setup Required</h3>
+            <p>Make sure the UIBridge API server is running on <code>http://localhost:3002</code></p>
+            <pre>node api-server.cjs</pre>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🎮 Debug Panel Controls</h3>
+            <div class="debug-controls">
+                <button onclick="uibridge.showDebugPanel()">🔍 Show Debug Panel</button>
+                <button onclick="uibridge.hideDebugPanel()">🙈 Hide Debug Panel</button>
+                <button onclick="uibridge.toggleDebugPanel()">🔄 Toggle Debug Panel</button>
+                <button class="danger" onclick="uibridge.destroyDebugPanel()">❌ Destroy Panel</button>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🎯 Test Commands</h3>
+            <p>Click these buttons to see automation commands appear in the debug panel:</p>
+            
+            <div class="buttons-container">
+                <button id="test-btn-1" onclick="handleTestClick(this)">🎯 Test Button 1</button>
+                <button id="test-btn-2" onclick="handleTestClick(this)">🎯 Test Button 2</button>
+                <button id="test-btn-3" onclick="handleTestClick(this)">🎯 Test Button 3</button>
+                <button class="info" onclick="takeScreenshot()">📸 Take Screenshot</button>
+                <button class="info" onclick="getPageInfo()">📄 Get Page Info</button>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🤖 External Automation Test</h3>
+            <p>Run these PowerShell commands to see external automation in the debug panel:</p>
+            
+            <pre>
+# Load the helper functions
+. .\uibridge-powershell-helpers.ps1
+
+# Test commands that will show in the debug panel
+Click-UIBridgeElement -Selector "#test-btn-1"
+Take-UIBridgeScreenshot
+Click-UIBridgeText -Text "Test Button 2"
+            </pre>
+            
+            <div class="success-box">
+                <p><strong>💡 Pro Tip:</strong> The debug panel shows both local commands (clicked on this page) and external commands (from PowerShell/API calls) in real-time!</p>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>📊 Live Status</h3>
+            <div id="status">
+                <p>Debug Panel Status: <span id="panel-status">Not initialized</span></p>
+                <p>Server Connection: <span id="server-status">Unknown</span></p>
+                <p>Commands Executed: <span id="command-count">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include UIBridge -->
+    <script type="module">
+        import UIBridge from './dist/uibridge.esm.js';
+        
+        // Initialize UIBridge with debug panel enabled
+        window.uibridge = new UIBridge({
+            enableRemoteControl: true,
+            showDebugPanel: true,  // 🎯 This enables the visual debug panel
+            debugPanelOptions: {
+                position: 'bottom-right',
+                minimized: false,
+                showScreenshots: true,
+                autoConnect: true
+            },
+            debug: true
+        });
+        
+        await window.uibridge.init();
+        
+        // Global functions for the demo
+        window.handleTestClick = function(button) {
+            button.style.background = 'linear-gradient(45deg, #FF9800, #F57C00)';
+            setTimeout(() => {
+                button.style.background = 'linear-gradient(45deg, #4CAF50, #45a049)';
+            }, 300);
+            
+            updateCommandCount();
+        };
+        
+        window.takeScreenshot = async function() {
+            try {
+                const result = await window.uibridge.execute('screenshot', { 
+                    fullPage: false,
+                    autoSave: true 
+                });
+                console.log('Screenshot taken:', result);
+                updateCommandCount();
+            } catch (error) {
+                console.error('Screenshot failed:', error);
+            }
+        };
+        
+        window.getPageInfo = function() {
+            const info = {
+                title: document.title,
+                url: window.location.href,
+                timestamp: new Date().toISOString()
+            };
+            console.log('Page info:', info);
+            updateCommandCount();
+        };
+        
+        function updateCommandCount() {
+            const history = window.uibridge.getHistory();
+            document.getElementById('command-count').textContent = history.length;
+        }
+        
+        function updateStatus() {
+            const panelStatus = window.uibridge.debugPanel ? 'Active' : 'Not initialized';
+            const remoteStatus = window.uibridge.getRemoteControlStatus();
+            
+            document.getElementById('panel-status').textContent = panelStatus;
+            document.getElementById('server-status').textContent = remoteStatus.polling ? 'Connected' : 'Disconnected';
+            
+            updateCommandCount();
+        }
+        
+        // Update status every 2 seconds
+        setInterval(updateStatus, 2000);
+        updateStatus();
+        
+        console.log('🌉 UIBridge Debug Panel Demo Ready!');
+        console.log('Debug panel should appear in the bottom-right corner.');
+        console.log('Use the PowerShell commands to test external automation.');
+    </script>
+</body>
+</html> 

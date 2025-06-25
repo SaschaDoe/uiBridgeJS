@@ -30,6 +30,7 @@
     "uibridge-help.js",
     "uibridge-powershell-helpers.ps1",
     "uibridge-example-improved.ps1",
+    "uibridge-debug-panel-example.html",
     "setup-server.js",
     "test-screenshot-fix.html",
     "test-screenshot-fix.ps1",

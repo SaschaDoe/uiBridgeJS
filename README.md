@@ -5,27 +5,32 @@
 [![npm version](https://badge.fury.io/js/@sashbot/uibridge.svg)](https://www.npmjs.com/package/@sashbot/uibridge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🚀 NEW in v1.3.0: AI-Optimized Automation
+## 🚀 NEW in v1.4.0: Visual Debug Panel + AI-Optimized Automation
 
-UIBridge now includes **simplified PowerShell helpers** that make AI automation incredibly easy. What used to require complex REST calls is now simple function calls!
-
-```powershell
-# ✅ NEW AI-FRIENDLY WAY - Copy helper file to your project
-. .\uibridge-powershell-helpers.ps1
-
-# Complete automation in 3 lines:
-Start-UIBridgeSession -Url "http://localhost:5173"    # Setup + navigate + screenshot
-Click-UIBridgeText -Text "Submit"                     # Click button by text
-Take-UIBridgeScreenshot                               # Verify with screenshot
-```
+UIBridge now includes a **real-time visual debug panel** that shows automation happening live in your web app, plus **simplified PowerShell helpers** for AI agents!
 
 ```javascript
-// ✅ Enable in your web app - All you need for remote control
+// ✅ RECOMMENDED: Enable visual debugging + remote control
 const uibridge = new UIBridge({ 
-  enableRemoteControl: true  // 🎯 That's it!
+  enableRemoteControl: true,
+  showDebugPanel: true,        // 🎯 NEW: See automation happen live!
+  debugPanelOptions: {
+    position: 'bottom-right',
+    showScreenshots: true
+  }
 });
 await uibridge.init();
-// 🤖 External automation now works automatically!
+// 🌉 Debug panel appears showing real-time automation activity!
+```
+
+```powershell
+# ✅ AI-FRIENDLY PowerShell automation with live visual feedback
+. .\uibridge-powershell-helpers.ps1
+
+# Commands appear instantly in the debug panel:
+Start-UIBridgeSession -Url "http://localhost:5173"    # Setup + navigate + screenshot
+Click-UIBridgeText -Text "Submit"                     # Click button by text  
+Take-UIBridgeScreenshot                               # Verify with screenshot
 ```
 
 📖 **[Complete Migration Guide](./documentation/ssd.md)** | 🚀 **[PowerShell Helpers](./uibridge-powershell-helpers.ps1)**
@@ -43,16 +48,23 @@ npx uibridge-setup  # Copies server files to your project
 node uibridge-api-server.cjs  # Start on port 3002
 ```
 
-### 3. Enable in Your Web App
+### 3. Enable in Your Web App - **WITH VISUAL DEBUG PANEL**
 ```javascript
 // React/Svelte/Vue/Vanilla - works everywhere
 import UIBridge from '@sashbot/uibridge';
 
 const uibridge = new UIBridge({ 
   enableRemoteControl: true,  // Auto-polling enabled
+  showDebugPanel: true,       // 🎯 RECOMMENDED: Visual automation feedback
+  debugPanelOptions: {
+    position: 'bottom-right',
+    showScreenshots: true,
+    autoConnect: true
+  },
   debug: true
 });
 await uibridge.init();
+// 🌉 You'll see a floating debug panel showing live automation activity!
 ```
 
 ### 4. External Automation (PowerShell/AI) - **RECOMMENDED**
@@ -173,6 +185,11 @@ onMount(async () => {
   const { default: UIBridge } = await import('@sashbot/uibridge');
   const uibridge = new UIBridge({ 
     enableRemoteControl: true,
+    showDebugPanel: true,        // Visual automation feedback
+    debugPanelOptions: {
+      position: 'bottom-right',
+      showScreenshots: true
+    },
     debug: true 
   });
   await uibridge.init();
@@ -188,7 +205,12 @@ function App() {
   useEffect(() => {
     const initUIBridge = async () => {
       const uibridge = new UIBridge({ 
-        enableRemoteControl: true 
+        enableRemoteControl: true,
+        showDebugPanel: true,        // Real-time automation visualization
+        debugPanelOptions: {
+          position: 'bottom-right',
+          showScreenshots: true
+        }
       });
       await uibridge.init();
     };
@@ -208,7 +230,12 @@ export default {
   setup() {
     onMounted(async () => {
       const uibridge = new UIBridge({ 
-        enableRemoteControl: true 
+        enableRemoteControl: true,
+        showDebugPanel: true,        // Live automation monitoring
+        debugPanelOptions: {
+          position: 'bottom-right',
+          showScreenshots: true
+        }
       });
       await uibridge.init();
     });
@@ -262,6 +289,43 @@ Take-UIBridgeScreenshot
 - **Automatic screenshots** - saved with timestamps
 - **Simple function names** - easy for AI to remember
 - **Rich console feedback** - colored output for debugging
+
+## 🌉 Visual Debug Panel - **GAME CHANGER**
+
+The debug panel shows **real-time automation activity** in your web app:
+
+### 🎯 What You See
+- **Live Command Feed**: Every click, screenshot, and command as it happens
+- **Screenshot Previews**: See what automation captures
+- **Success/Error Status**: Instant feedback on command results  
+- **Server Connection**: Visual indicator of API server health
+- **Drag & Drop**: Position anywhere on screen
+- **Minimize/Expand**: Stay focused when needed
+
+### 📱 Enable Debug Panel
+```javascript
+const uibridge = new UIBridge({
+  enableRemoteControl: true,
+  showDebugPanel: true,          // 🔥 Enable the magic
+  debugPanelOptions: {
+    position: 'bottom-right',    // top-left, top-right, bottom-left, bottom-right
+    minimized: false,            // Start expanded
+    showScreenshots: true,       // Show screenshot previews  
+    autoConnect: true           // Auto-connect to server
+  }
+});
+```
+
+### 🎮 Panel Controls
+```javascript
+// Show/hide programmatically
+uibridge.showDebugPanel();
+uibridge.hideDebugPanel(); 
+uibridge.toggleDebugPanel();
+uibridge.destroyDebugPanel();
+```
+
+**💡 Pro Tip**: The debug panel bridges the gap between your web app and external automation - you finally **see what's happening** instead of guessing!
 
 ## 🔍 Available Commands
 
@@ -369,14 +433,15 @@ Test-UIBridgeServer
 
 ## 🎯 Key Benefits
 
-- **🚀 Zero Setup**: `enableRemoteControl: true` and you're done
+- **🌉 Visual Debugging**: Real-time debug panel shows automation happening live
 - **🤖 AI-Optimized**: PowerShell helpers make automation 10x easier for AI agents
 - **⚡ Simple Commands**: `Click-UIBridgeText -Text "Submit"` instead of complex REST calls
 - **📱 Universal**: Works with any JavaScript framework
 - **🛡️ Reliable**: Built-in error handling and retry logic
-- **📸 Auto-Screenshots**: Every action can be verified visually
+- **📸 Live Screenshots**: See automation screenshots instantly in the debug panel
+- **🔗 Bridge Gap**: Connect external automation to your actual web app visually
 - **🔒 Secure**: Standard HTTP communication, no special permissions needed
 
 ---
 
-**🤖 Built for AI**: UIBridge v1.3.0+ is specifically designed to make web automation trivial for AI agents, eliminating complexity while providing powerful automation capabilities. 
+**🌉 Built for Visual AI Automation**: UIBridge v1.4.0+ combines powerful automation with real-time visual debugging - see your automation happen live instead of wondering what's going on behind the scenes! 

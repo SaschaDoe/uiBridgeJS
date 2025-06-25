@@ -1,6 +1,7 @@
 import { CommandRegistry } from './CommandRegistry.js';
 import { SelectorEngine } from './SelectorEngine.js';
 import { CDIGenerator } from '../discovery/CDIGenerator.js';
+import { UIBridgeDebugPanel } from '../components/UIBridgeDebugPanel.js';
 import { clickCommand } from '../commands/click.js';
 import { screenshotCommand } from '../commands/screenshot.js';
 import { helpCommand } from '../commands/help.js';
@@ -25,6 +26,15 @@ export class UIBridge {
       pollInterval: 500, // ms between polls
       autoStartPolling: true,
       
+      // Visual Debug Panel (NEW)
+      showDebugPanel: false,
+      debugPanelOptions: {
+        position: 'bottom-right',
+        minimized: false,
+        showScreenshots: true,
+        autoConnect: true
+      },
+      
       // Screenshot save configuration
       defaultScreenshotConfig: {
         autoSave: false,
@@ -43,6 +53,7 @@ export class UIBridge {
     this.registry = new CommandRegistry();
     this.selectorEngine = new SelectorEngine();
     this.cdiGenerator = null;
+    this.debugPanel = null;
     this._isInitialized = false;
     this._initStartTime = null;
     this._commandHistory = [];
@@ -104,12 +115,18 @@ export class UIBridge {
         this.startRemoteControl();
       }
       
+      // Initialize debug panel if enabled
+      if (this.config.showDebugPanel && typeof window !== 'undefined') {
+        this._initDebugPanel();
+      }
+      
       // Dispatch initialization event
       this._dispatchEvent('uibridge:initialized', {
         version: this.config.version,
         commands: this.registry.getNames(),
         initTime,
-        remoteControlEnabled: this.config.enableRemoteControl
+        remoteControlEnabled: this.config.enableRemoteControl,
+        debugPanelEnabled: this.config.showDebugPanel
       });
       
     } catch (error) {
@@ -928,6 +945,74 @@ Invoke-UIBridgeCommand -Command 'click' -Parameters @{selector='#btn'}`
       serverUrl: this.config.serverUrl,
       pollInterval: this.config.pollInterval
     };
+  }
+
+  /**
+   * Initialize the visual debug panel
+   * @private
+   */
+  _initDebugPanel() {
+    try {
+      this.debugPanel = new UIBridgeDebugPanel({
+        serverUrl: this.config.serverUrl,
+        ...this.config.debugPanelOptions
+      });
+      
+      this._log('Debug panel initialized');
+    } catch (error) {
+      this._log('Failed to initialize debug panel:', error);
+    }
+  }
+  
+  /**
+   * Show debug panel
+   */
+  showDebugPanel() {
+    if (!this.debugPanel && typeof window !== 'undefined') {
+      this._initDebugPanel();
+    }
+    
+    if (this.debugPanel) {
+      this.debugPanel.show();
+    }
+  }
+  
+  /**
+   * Hide debug panel
+   */
+  hideDebugPanel() {
+    if (this.debugPanel) {
+      this.debugPanel.hide();
+    }
+  }
+  
+  /**
+   * Toggle debug panel visibility
+   */
+  toggleDebugPanel() {
+    if (!this.debugPanel && typeof window !== 'undefined') {
+      this._initDebugPanel();
+      return;
+    }
+    
+    if (this.debugPanel) {
+      // Check current visibility and toggle
+      if (this.debugPanel.element.style.display === 'none') {
+        this.debugPanel.show();
+      } else {
+        this.debugPanel.hide();
+      }
+    }
+  }
+  
+  /**
+   * Destroy debug panel
+   */
+  destroyDebugPanel() {
+    if (this.debugPanel) {
+      this.debugPanel.destroy();
+      this.debugPanel = null;
+    }
   }
 
 
