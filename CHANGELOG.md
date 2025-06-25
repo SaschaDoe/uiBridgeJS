@@ -5,6 +5,76 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2024-12-31
+
+### 🚀 MAJOR: PowerShell Helpers Now Primary Method for AI Agents
+
+**BREAKING CHANGE**: PowerShell helpers are now the PRIMARY and recommended method for AI agents to use UIBridge, with alternative methods positioned as secondary options for specific use cases.
+
+### 🛡️ Fixed Critical JSON Corruption Issues
+- **FIXED**: `SyntaxError: Expected property name or '}' in JSON at position 1` errors
+- **FIXED**: String escaping issues in `Click-UIBridgeText` and `Click-UIBridgeTestId` functions  
+- **FIXED**: Inconsistent JSON depth settings across different functions
+- **ADDED**: `ConvertTo-SafeJson` function with built-in validation and consistent formatting
+- **IMPROVED**: Proper selector objects instead of problematic string concatenation
+
+### 🧪 Comprehensive Testing Infrastructure
+- **ADDED**: `test-powershell-helpers.ps1` - 17 unit tests for JSON generation and validation
+- **ADDED**: `test-powershell-helpers-live.ps1` - Integration tests with real server
+- **ADDED**: Regression tests to prevent JSON corruption bugs from returning
+- **COVERS**: Special characters, unicode, emoji, complex nested objects, error handling
+
+### 📚 README Restructured as Single Source of Truth
+- **RESTRUCTURED**: PowerShell helpers now prominently featured as primary method
+- **CONSOLIDATED**: Merged POWERSHELL_HELPERS_README.md into main README.md
+- **CLARIFIED**: Clear guidance on when to use alternative methods:
+  - Live Session: Visual debugging in your own browser
+  - HTTP API: Non-PowerShell environments (Python, Node.js)
+  - NPM Package: JavaScript/TypeScript applications
+- **IMPROVED**: AI agent best practices and comprehensive troubleshooting
+
+### 🎯 Enhanced PowerShell Helper Functions
+- **IMPROVED**: All functions now use `ConvertTo-SafeJson` for consistent, validated JSON
+- **FIXED**: Special character handling (quotes, apostrophes, unicode, emoji)
+- **ADDED**: Better error messages with troubleshooting guidance
+- **ADDED**: Comprehensive function reference table
+- **ENHANCED**: Multiple click strategies with automatic fallback
+
+### 🔧 Technical Improvements
+- **VALIDATION**: Every JSON payload is validated before sending to server
+- **CONSISTENCY**: All JSON uses depth=10 and proper compression
+- **ERROR HANDLING**: Clear error messages for debugging JSON issues
+- **RELIABILITY**: Prevents malformed JSON from reaching the server
+
+### 📊 What's Fixed
+- ❌ **Before**: `"text=`"$Text`""` (caused JSON corruption)
+- ✅ **After**: `@{ text = $Text }` (proper object structure)
+- ❌ **Before**: Inconsistent JSON depth settings  
+- ✅ **After**: Consistent `ConvertTo-SafeJson` function
+- ❌ **Before**: No JSON validation
+- ✅ **After**: Every JSON validated before sending
+
+### 🎉 Benefits for AI Agents
+1. **Reliability**: Built-in JSON validation prevents corruption errors
+2. **Simplicity**: `Click-UIBridgeText -Text "Submit"` instead of complex APIs
+3. **Testing**: 17 unit tests ensure consistent behavior
+4. **Error Handling**: Clear troubleshooting guidance
+5. **Universal**: Works with any web application
+6. **Performance**: Auto-save screenshots with timestamps
+
+### 🔬 Test Results
+```
+📊 Test Results Summary
+Total Tests: 17
+Passed: 17 ✅
+Failed: 0 ✅
+```
+
+### Migration Guide
+- **Automatic**: Existing PowerShell helper usage gets reliability improvements automatically
+- **Testing**: Run `pwsh -ExecutionPolicy Bypass -File test-powershell-helpers.ps1` to verify
+- **Documentation**: Main README.md is now the single source of truth
+
 ## [1.5.2] - 2024-12-30
 
 ### 🔧 TypeScript Definitions Fixed

@@ -1,6 +1,6 @@
 {
   "name": "@sashbot/uibridge",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "description": "🤖 AI-friendly live session automation with REAL screenshot backgrounds (no transparency issues!) - control your EXISTING browser with visual debug panel. Perfect for AI agents!",
   "type": "module",
   "main": "dist/uibridge.cjs.js",
@@ -37,6 +37,8 @@
     "test-screenshot-fix.html",
     "test-screenshot-fix.ps1",
     "test-help-browser.html",
+    "test-powershell-helpers.ps1",
+    "test-powershell-helpers-live.ps1",
     "example-powershell-automation.ps1"
   ],
   "scripts": {
