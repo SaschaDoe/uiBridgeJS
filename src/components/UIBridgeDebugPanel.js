@@ -557,7 +557,7 @@ export class UIBridgeDebugPanel {
     this.element.style.display = 'none';
   }
   
-  setPosition(position) {
+  setDebugPanelPosition(position) {
     this.options.position = position;
     this.setPosition();
   }

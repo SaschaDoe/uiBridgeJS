@@ -1,7 +1,7 @@
 {
   "name": "@sashbot/uibridge",
-  "version": "1.4.0",
-  "description": "AI-optimized web automation framework with simplified PowerShell helpers - enables LLMs to easily control and interact with running web apps",
+  "version": "1.4.1",
+  "description": "AI-optimized web automation framework with real-time visual debug panel - see automation happening live in your web app",
   "type": "module",
   "main": "dist/uibridge.cjs.js",
   "module": "dist/uibridge.esm.js",
@@ -65,6 +65,9 @@
   "keywords": [
     "automation",
     "web-automation",
+    "visual-debugging",
+    "debug-panel",
+    "real-time-automation",
     "ui-testing",
     "browser-automation",
     "llm-integration",
