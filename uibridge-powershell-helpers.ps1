@@ -11,6 +11,28 @@ $Global:UIBridgeConfig = @{
     Headers = @{ 'Content-Type' = 'application/json' }
 }
 
+# Helper function to safely create JSON with proper escaping
+function ConvertTo-SafeJson {
+    param(
+        [Parameter(Mandatory=$true)]
+        $InputObject,
+        [int]$Depth = 10
+    )
+    
+    try {
+        # Convert to JSON with consistent depth and compression
+        $json = $InputObject | ConvertTo-Json -Depth $Depth -Compress
+        
+        # Validate the JSON is parseable
+        $null = $json | ConvertFrom-Json
+        
+        return $json
+    } catch {
+        Write-Host "❌ JSON conversion error: $($_.Exception.Message)" -ForegroundColor Red
+        throw "Failed to create valid JSON: $($_.Exception.Message)"
+    }
+}
+
 function Test-UIBridgeServer {
     <#
     .SYNOPSIS
@@ -36,7 +58,8 @@ function Open-UIBridgePage {
         [string]$Url
     )
     
-    $body = @{ url = $Url } | ConvertTo-Json
+    $bodyObj = @{ url = $Url }
+    $body = ConvertTo-SafeJson -InputObject $bodyObj
     
     try {
         $response = Invoke-RestMethod -Uri "$($Global:UIBridgeConfig.ServerUrl)/navigate" -Method POST -Headers $Global:UIBridgeConfig.Headers -Body $body
@@ -73,10 +96,12 @@ function Take-UIBridgeScreenshot {
         backgroundColor = $BackgroundColor
     }
     
-    $body = @{
+    $bodyObj = @{
         command = "screenshot"
         options = $options
-    } | ConvertTo-Json -Depth 3
+    }
+    
+    $body = ConvertTo-SafeJson -InputObject $bodyObj
     
     try {
         $response = Invoke-RestMethod -Uri "$($Global:UIBridgeConfig.ServerUrl)/execute" -Method POST -Headers $Global:UIBridgeConfig.Headers -Body $body
@@ -113,11 +138,13 @@ function Click-UIBridgeElement {
         timeout = $Timeout
     }
     
-    $body = @{
+    $bodyObj = @{
         command = "click"
         selector = $Selector
         options = $options
-    } | ConvertTo-Json -Depth 3
+    }
+    
+    $body = ConvertTo-SafeJson -InputObject $bodyObj
     
     try {
         $response = Invoke-RestMethod -Uri "$($Global:UIBridgeConfig.ServerUrl)/execute" -Method POST -Headers $Global:UIBridgeConfig.Headers -Body $body
@@ -146,7 +173,33 @@ function Click-UIBridgeText {
         [int]$Timeout = 5000
     )
     
-    return Click-UIBridgeElement -Selector "text=`"$Text`"" -Timeout $Timeout
+    # Use proper text selector object instead of string concatenation
+    $options = @{
+        timeout = $Timeout
+    }
+    
+    $bodyObj = @{
+        command = "click"
+        selector = @{ text = $Text }
+        options = $options
+    }
+    
+    $body = ConvertTo-SafeJson -InputObject $bodyObj
+    
+    try {
+        $response = Invoke-RestMethod -Uri "$($Global:UIBridgeConfig.ServerUrl)/execute" -Method POST -Headers $Global:UIBridgeConfig.Headers -Body $body
+        
+        if ($response.success) {
+            Write-Host "👆 Clicked text: '$Text'" -ForegroundColor Green
+            return $response
+        } else {
+            Write-Host "❌ Click text failed: $($response.error)" -ForegroundColor Red
+            return $response
+        }
+    } catch {
+        Write-Host "❌ Click text error: $($_.Exception.Message)" -ForegroundColor Red
+        throw
+    }
 }
 
 function Click-UIBridgeTestId {
@@ -160,7 +213,33 @@ function Click-UIBridgeTestId {
         [int]$Timeout = 5000
     )
     
-    return Click-UIBridgeElement -Selector "[data-testid=`"$TestId`"]" -Timeout $Timeout
+    # Use proper testId selector object instead of CSS selector string
+    $options = @{
+        timeout = $Timeout
+    }
+    
+    $bodyObj = @{
+        command = "click"
+        selector = @{ testId = $TestId }
+        options = $options
+    }
+    
+    $body = ConvertTo-SafeJson -InputObject $bodyObj
+    
+    try {
+        $response = Invoke-RestMethod -Uri "$($Global:UIBridgeConfig.ServerUrl)/execute" -Method POST -Headers $Global:UIBridgeConfig.Headers -Body $body
+        
+        if ($response.success) {
+            Write-Host "👆 Clicked test ID: $TestId" -ForegroundColor Green
+            return $response
+        } else {
+            Write-Host "❌ Click test ID failed: $($response.error)" -ForegroundColor Red
+            return $response
+        }
+    } catch {
+        Write-Host "❌ Click test ID error: $($_.Exception.Message)" -ForegroundColor Red
+        throw
+    }
 }
 
 function Get-UIBridgePageInfo {
@@ -230,8 +309,10 @@ function Start-UIBridgeSession {
     }
 }
 
-# Export functions
-Export-ModuleMember -Function *
+# Export functions (only works when loaded as module)
+if ($MyInvocation.MyCommand.ModuleName) {
+    Export-ModuleMember -Function *
+}
 
 # Show usage examples
 Write-Host @"
@@ -242,6 +323,7 @@ Quick Examples:
   Open-UIBridgePage -Url "https://example.com"    # Navigate to a page
   Take-UIBridgeScreenshot                          # Take a screenshot
   Click-UIBridgeText -Text "Click Me"              # Click button by text
+  Click-UIBridgeTestId -TestId "submit-btn"        # Click by test ID
   Click-UIBridgeElement -Selector "#submit-btn"    # Click by CSS selector
   Get-UIBridgePageInfo                             # Get current page info
   Get-UIBridgeScreenshots                          # List saved screenshots

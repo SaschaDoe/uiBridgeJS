@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.2] - 2024-12-30
+
+### 🔧 TypeScript Definitions Fixed
+- **FIXED**: Updated TypeScript definitions to include all missing configuration properties
+- **ADDED**: `enableRemoteControl`, `showDebugPanel`, `debugPanelOptions` to UIBridgeConfig interface
+- **ADDED**: `DebugPanelOptions` interface with proper typing for debug panel configuration
+- **ADDED**: `serverUrl`, `pollInterval`, `autoStartPolling` remote control properties
+- **UPDATED**: TypeScript definitions version from v1.3.2 to v1.5.2
+
+### What Was Broken
+- TypeScript users got error: `'enableRemoteControl' does not exist in type 'UIBridgeConfig'`
+- Documentation showed properties that weren't in the TypeScript definitions
+- SvelteKit and other TypeScript projects couldn't use the remote control features
+
+### What's Fixed
+- All configuration properties now properly typed in TypeScript
+- IntelliSense and autocompletion works for all configuration options
+- No more TypeScript errors when using `enableRemoteControl`, `showDebugPanel`, etc.
+
+## [1.5.1] - 2024-12-30
+
+### 📚 Documentation Clarification
+- **CLARIFIED**: Screenshot documentation now clearly explains we capture the ACTUAL page background
+- **REMOVED**: Confusing examples that suggested overriding page colors (e.g., `-BackgroundColor "yellow"`)
+- **IMPROVED**: Troubleshooting section emphasizes auto-detection of real page backgrounds
+- **GOAL**: Make it crystal clear that the purpose is to see YOUR page's actual background, not override it
+
+### What Changed
+- **Default behavior**: `Take-UIBridgeLiveScreenshot` captures your page's actual background color
+- **Auto-detection**: The system detects computed CSS background colors from your HTML page
+- **No override needed**: You should see yellow backgrounds as yellow, blue as blue, etc.
+- **Fallback options**: Only use manual colors if auto-detection fails
+
 ## [1.5.0] - 2024-12-30
 
 ### 🎯 MAJOR: Fixed Screenshot Transparency Issue
@@ -113,4 +146,3 @@ The old `server-example.cjs` was a queue-only server that required web apps to p
 - ✅ `setup-server.js` - Easy server setup helper
 - ✅ `test-screenshot-fix.html` - Current working test page
 - ✅ `test-help-browser.html` - Help system test
-- ✅ `

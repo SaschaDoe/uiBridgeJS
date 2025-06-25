@@ -1,6 +1,6 @@
 {
   "name": "@sashbot/uibridge",
-  "version": "1.5.0",
+  "version": "1.5.2",
   "description": "🤖 AI-friendly live session automation with REAL screenshot backgrounds (no transparency issues!) - control your EXISTING browser with visual debug panel. Perfect for AI agents!",
   "type": "module",
   "main": "dist/uibridge.cjs.js",
