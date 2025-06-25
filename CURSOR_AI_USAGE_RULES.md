@@ -1,6 +1,6 @@
 # UIBridge Usage Rules for Cursor AI
 
-## NEW v1.4.0: Visual Debug Panel + Zero-Configuration Remote Control
+## NEW v1.4.2: Live Session Automation + Visual Debug Panel
 
 UIBridge now includes a **real-time visual debug panel** that shows automation happening live in your web app! Plus **built-in auto-polling** for zero-configuration automation.
 
@@ -182,7 +182,7 @@ function Start-WebAutomation {
 }
 ```
 
-## Key Benefits of v1.4.0
+## Key Benefits of v1.4.2
 - 🌉 **Visual Debug Panel** - See automation happening live in your web app
 - ✅ **Zero manual polling** - Built into UIBridge
 - ✅ **PowerShell helpers** - Simple AI-friendly functions
@@ -199,7 +199,7 @@ await uibridge.init();
 window.uibridge = uibridge;
 pollForCommands(); // 30+ lines of manual code
 
-// ✅ NEW WAY (v1.4.0+) - Visual debugging + automatic
+// ✅ NEW WAY (v1.4.2+) - Live session + visual debugging
 uibridge = new UIBridge({ 
   enableRemoteControl: true,
   showDebugPanel: true,        // 🔥 See automation happen live!
@@ -251,4 +251,4 @@ console.log(status);
 - **Screenshot verification** without saving files
 - **Real-time monitoring** of automation health
 
-**🎯 The Bottom Line**: v1.4.0 combines powerful automation with visual debugging - you finally **see what's happening** instead of guessing! The debug panel is the game-changer that makes UIBridge perfect for AI automation. 
+**🎯 The Bottom Line**: v1.4.2 combines powerful automation with live session control and visual debugging - you finally **see what's happening** in your existing browser instead of guessing! The client-server mode and debug panel are the game-changers that make UIBridge perfect for AI automation. 

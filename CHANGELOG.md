@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.3] - 2024-12-20
+
+### 🌟 NEW: Live Session Automation for AI Agents
+- **client-server.cjs**: Revolutionary new server mode that connects to your existing browser
+- **Live Session Control**: No more hidden browsers - see automation happening in real-time
+- **AI-Optimized PowerShell Helpers**: `uibridge-live-session-helpers.ps1` with ultra-simple commands
+- **Visual Debug Panel Integration**: Real-time activity feed updates automatically from external commands
+
+### 🔧 Enhanced Screenshot Functionality  
+- **Fixed html2canvas Loading**: Multiple CDN fallbacks with validation testing
+- **Improved Error Handling**: Better timeout handling and CORS support
+- **Validation Testing**: Ensures html2canvas actually works before proceeding
+
+### 📚 Updated Documentation
+- **README-live-session.md**: Complete guide for AI agents emphasizing live session automation
+- **Updated Setup Script**: Now includes both client-server and classic modes with clear recommendations
+- **Version Updates**: All documentation updated to v1.4.2 with live session emphasis
+
+### 🤖 AI Agent Benefits
+- ✅ See automation happening in real-time in your existing browser
+- ✅ Visual debug panel shows command results instantly  
+- ✅ Simple PowerShell commands: `Click-UIBridgeLiveText -Text "Submit"`
+- ✅ No more hidden browser confusion
+
 ## [1.3.2] - 2024-12-28
 
 ### 🎯 Architecture Simplified - ONE SERVER ONLY

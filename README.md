@@ -5,7 +5,7 @@
 [![npm version](https://badge.fury.io/js/@sashbot/uibridge.svg)](https://www.npmjs.com/package/@sashbot/uibridge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🚀 NEW in v1.4.0: Visual Debug Panel + AI-Optimized Automation
+## 🚀 NEW in v1.4.2: Live Session Automation + Visual Debug Panel
 
 UIBridge now includes a **real-time visual debug panel** that shows automation happening live in your web app, plus **simplified PowerShell helpers** for AI agents!
 
@@ -43,9 +43,18 @@ npm install @sashbot/uibridge
 ```
 
 ### 2. Setup Server (Essential for AI Automation)
+
+**🌟 RECOMMENDED for AI: Live Session Mode**
+```bash
+# Download the live session server
+curl -o client-server.cjs https://unpkg.com/@sashbot/uibridge@latest/client-server.cjs
+node client-server.cjs  # Start live session server on port 3002
+```
+
+**Alternative: Classic Hidden Browser Mode**
 ```bash
 npx uibridge-setup  # Copies server files to your project
-node uibridge-api-server.cjs  # Start on port 3002
+node api-server.cjs  # Start hidden browser server on port 3002
 ```
 
 ### 3. Enable in Your Web App - **WITH VISUAL DEBUG PANEL**
@@ -444,4 +453,4 @@ Test-UIBridgeServer
 
 ---
 
-**🌉 Built for Visual AI Automation**: UIBridge v1.4.0+ combines powerful automation with real-time visual debugging - see your automation happen live instead of wondering what's going on behind the scenes! 
+**🌉 Built for Visual AI Automation**: UIBridge v1.4.2+ combines powerful automation with real-time visual debugging and live session control - see your automation happen live in your existing browser instead of wondering what's going on behind the scenes! 

@@ -65,9 +65,19 @@ function copyServerFiles() {
 
   const serverFiles = [
     {
+      source: 'client-server.cjs',
+      dest: 'uibridge-client-server.cjs',
+      description: '🌟 RECOMMENDED: Live session server - Control your existing browser'
+    },
+    {
       source: 'api-server.cjs',
       dest: 'uibridge-api-server.cjs',
-      description: 'UIBridge API server - Executes commands directly with Playwright'
+      description: 'Classic server - Executes commands in hidden browser with Playwright'
+    },
+    {
+      source: 'uibridge-live-session-helpers.ps1',
+      dest: 'uibridge-live-session-helpers.ps1',
+      description: '🤖 AI-friendly PowerShell helpers for live session automation'
     },
     {
       source: 'test-screenshot-fix.html',
@@ -77,7 +87,7 @@ function copyServerFiles() {
     {
       source: 'test-screenshot-fix.ps1',
       dest: 'uibridge-test.ps1',
-      description: 'PowerShell test script'
+      description: 'PowerShell test script for classic server'
     }
   ];
 
@@ -101,31 +111,35 @@ function copyServerFiles() {
 }
 
 function showInstructions() {
-  console.log('\n🎉 Setup complete! Here\'s how to use the servers:');
-  console.log('\n📋 Quick Start:');
-  console.log('   1. Start the API server:');
+  console.log('\n🎉 Setup complete! You now have two automation modes:');
+  
+  console.log('\n🌟 RECOMMENDED: Live Session Mode (Perfect for AI Agents)');
+  console.log('   1. Start the live session server:');
+  console.log('      node uibridge-client-server.cjs');
+  console.log('   2. Add to your web app HTML:');
+  console.log('      <script src="http://localhost:3002/uibridge-client.js"></script>');
+  console.log('   3. Open your web app in a browser (see debug panel appear!)');
+  console.log('   4. Use AI-friendly PowerShell:');
+  console.log('      . .\\uibridge-live-session-helpers.ps1');
+  console.log('      Start-UIBridgeLiveSession');
+  
+  console.log('\n🔧 Alternative: Classic Hidden Browser Mode');
+  console.log('   1. Start the classic server:');
   console.log('      node uibridge-api-server.cjs');
-  console.log('   2. The server will run on: http://localhost:3002');
-  console.log('   3. Test with PowerShell:');
+  console.log('   2. Test with PowerShell:');
   console.log('      .\\uibridge-test.ps1');
-  console.log('   4. Or open test page: http://localhost:3002/uibridge-test.html');
+  console.log('   3. Or open test page: http://localhost:3002/uibridge-test.html');
   
-  console.log('\n🔧 API Endpoints:');
-  console.log('   POST /navigate - Navigate to a URL');
-  console.log('   POST /execute  - Execute UIBridge commands');
-  console.log('   GET  /health   - Health check');
+  console.log('\n🤖 AI Agent Benefits with Live Session Mode:');
+  console.log('   ✅ See automation happening in real-time');
+  console.log('   ✅ Visual debug panel shows command results');
+  console.log('   ✅ No hidden browser confusion');
+  console.log('   ✅ Simple PowerShell commands');
   
-  console.log('\n📝 PowerShell Example:');
-  console.log(`   $params = @{
-       Uri = 'http://localhost:3002/execute'
-       Method = 'POST'
-       Headers = @{ 'Content-Type' = 'application/json' }
-       Body = @{
-           command = 'screenshot'
-           options = @{ fullPage = $true }
-       } | ConvertTo-Json -Depth 3
-   }
-   $response = Invoke-RestMethod @params`);
+  console.log('\n📝 Live Session PowerShell Example:');
+  console.log(`   . .\\uibridge-live-session-helpers.ps1
+   Click-UIBridgeLiveText -Text "Submit"
+   Take-UIBridgeLiveScreenshot`);
 
   console.log('\n📚 For more help:');
   console.log('   npm run help:quickstart');
